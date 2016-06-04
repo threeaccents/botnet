@@ -1,13 +1,13 @@
-## Go Trojan
+## Go Backdoor
 
-Simple trojan written in GO. It features a command and control over cli and a trojan payload that communicates to the C&C over tcp.
+Simple go-backdoor written in GO. It features a command and control over cli and a go-backdoor payload that communicates to the C&C over tcp.
 
 # Usage:
 
  - Run the C&C:
 
 ```bash
-trojan --listen
+go-backdoor --listen
 ```
 
 This starts up a C&C that listens on default port `9999`.
@@ -15,10 +15,10 @@ This starts up a C&C that listens on default port `9999`.
  - Connect a payload to the C&C:
 
 ```bash
-trojan -port 9999
+go-backdoor -port 9999
 ```
 
-This will start a trojan payload that connects to the C&C on port `9999`.
+This will start a go-backdoor payload that connects to the C&C on port `9999`.
 
 - Now that we have a payload connected to our C&C we can run a view commands. You'll see the C&C prompt `<RL:#>`
 
