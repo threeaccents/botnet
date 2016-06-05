@@ -1,6 +1,6 @@
-## Go Backdoor
+## Go Botnet
 
-Simple backdoor written in GO. It features a command and control over cli and a backdoor payload that communicates to the C&C over tcp.
+Simple botnet written in GO. It features a command and control over cli and a backdoor payload that communicates to the C&C over tcp.
 
 # Usage:
 
