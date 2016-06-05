@@ -7,7 +7,7 @@ Simple botnet written in GO. It features a command and control over cli and a bo
  - Run the C&C:
 
 ```bash
-botnet --listen
+botnet -listen
 ```
 
 This starts up a C&C that listens on default port `9999`.
