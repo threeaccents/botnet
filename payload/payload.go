@@ -40,8 +40,6 @@ func (p *Payload) Run() {
 		commandByteBuffer := make([]byte, 2)
 		p.Conn.Read(commandByteBuffer)
 
-		fmt.Println("buffer", string(commandByteBuffer))
-
 		switch {
 		case string(commandByteBuffer) == "u:":
 			p.receiveFile()
