@@ -1,13 +1,13 @@
 ## Go Botnet
 
-Simple botnet written in GO. It features a command and control over cli and a backdoor payload that communicates to the C&C over tcp.
+Simple botnet written in GO. It features a command and control over cli and a botnet payload that communicates to the C&C over tcp.
 
 # Usage:
 
  - Run the C&C:
 
 ```bash
-backdoor --listen
+botnet --listen
 ```
 
 This starts up a C&C that listens on default port `9999`.
@@ -15,10 +15,10 @@ This starts up a C&C that listens on default port `9999`.
  - Connect a payload to the C&C:
 
 ```bash
-backdoor -port 9999
+botnet -port 9999
 ```
 
-This will start a backdoor payload that connects to the C&C on port `9999`.
+This will start a botnet payload that connects to the C&C on port `9999`.
 
 - Now that we have a payload connected to our C&C we can run a view commands. You'll see the C&C prompt `<RL:#>`
 
