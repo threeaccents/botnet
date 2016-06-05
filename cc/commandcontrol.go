@@ -101,5 +101,5 @@ func (c *CommandControl) getPayload(addr string) (*Payload, error) {
 		}
 	}
 
-	return nil, errors.New("payloa not found")
+	return nil, errors.New("payload not found")
 }
