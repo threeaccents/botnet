@@ -58,6 +58,7 @@ func (p *Payload) receiveFile() {
 	p.Conn.Read(bufferFileSize)
 	fileSize, err := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
 	if err != nil {
+		p.Conn.Write([]byte("[ERROR] converting string to int " + err.Error() + "\n\r"))
 		fmt.Println(err)
 		return
 	}
@@ -68,6 +69,7 @@ func (p *Payload) receiveFile() {
 	newFile, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println(err)
+		p.Conn.Write([]byte("[ERROR] creating file " + err.Error() + "\n\r"))
 		return
 	}
 	defer newFile.Close()
