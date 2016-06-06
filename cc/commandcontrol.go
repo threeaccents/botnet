@@ -42,7 +42,7 @@ func (c *CommandControl) Run() {
 
 func (c *CommandControl) handleConnections() {
 	for {
-		fmt.Print("<RL:#> ")
+		fmt.Print("<CC:#> ")
 		// Read the stdin
 		stdreader := bufio.NewReader(os.Stdin)
 		text, err := stdreader.ReadString('\n')
@@ -90,7 +90,7 @@ func (c *CommandControl) acceptConnections(listener net.Listener) {
 		c.Payloads = append(c.Payloads, p)
 
 		fmt.Printf("[*] new connection %s. Total connections: %d\n", p.Addr, len(c.Payloads))
-		fmt.Print("<RL:#> ")
+		fmt.Print("<CC:#> ")
 	}
 }
 
