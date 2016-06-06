@@ -56,7 +56,11 @@ func (p *Payload) receiveFile() {
 	bufferFileSize := make([]byte, 10)
 
 	p.Conn.Read(bufferFileSize)
-	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
+	fileSize, err := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	p.Conn.Read(bufferFileName)
 	fileName := strings.Trim(string(bufferFileName), ":")
@@ -64,6 +68,7 @@ func (p *Payload) receiveFile() {
 	newFile, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer newFile.Close()
 
