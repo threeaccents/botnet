@@ -36,6 +36,8 @@ func (c *Client) Run() {
 
 	c.Conn = conn
 
+	go c.checkHealth()
+
 	for {
 		// commandByteBuffer is the firt 2 bytes being sent by the server
 		// we grab this to check if the server is sending over any special commands
@@ -67,7 +69,20 @@ func (c *Client) silentMode() {
 	time.Sleep(c.ReconnTime * time.Minute)
 
 	// reconnect
+	fmt.Println("[*] reconnecting")
 	c.Run()
+}
+
+func (c *Client) checkHealth() {
+	for {
+		if _, err := c.Conn.Write([]byte("h2c \r")); err != nil {
+			fmt.Println("[*] lost connection to server")
+			c.silentMode()
+		}
+
+		fmt.Println("[*] pinged")
+		time.Sleep(15 * time.Second)
+	}
 }
 
 func (c *Client) watchEvent() {
