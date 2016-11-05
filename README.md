@@ -20,7 +20,7 @@ botnet -port 9999
 
 This will start a botnet payload that connects to the C&C on port `9999`.
 
-- Now that we have a payload connected to our C&C we can run a view commands. You'll see the C&C prompt `<RL:#>`
+- Now that we have a payload connected to our C&C we can run a view commands. You'll see the C&C prompt `<CC:#>`
 
 show all payloads connected to C&C:
 
