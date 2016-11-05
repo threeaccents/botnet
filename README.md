@@ -25,20 +25,20 @@ This will start a botnet payload that connects to the C&C on port `9999`.
 show all payloads connected to C&C:
 
 ```bash
-<RL:#> show
+<CC:#> show
 ```
 
 This will return the payload ids and addresses
 
 ```
-ID: 57533aa3e5b07e4383951462 Address: 127.0.0.1:64635
-ID: 57533aa3e5b07e4383951463 Address: 127.0.0.1:64634
+ID: 0 Address: 127.0.0.1:64635
+ID: 1 Address: 127.0.0.1:64634
 ```
 
-- To communicate with the payload use the `use` command followed by the payloads address:
+- To communicate with the payload use the `use` command followed by the payloads id:
 
 ```bash
-<RL:#> use 127.0.0.1:64346
+<CC:#> use 0
 ```
 
 You will notice now your prompt is changed to `<PL:#>`
@@ -65,4 +65,4 @@ This will send the specified file to the payload
 <PL:#> exit
 ```
 
-You should see a message saying `payload exiting` and the prompt should be back to `<RL#>`
+You should see a message saying `payload exiting` and the prompt should be back to `<CC#>`
