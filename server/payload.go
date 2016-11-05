@@ -1,4 +1,4 @@
-package cc
+package server
 
 import (
 	"bufio"
@@ -12,7 +12,6 @@ import (
 
 // Payload describes the connection with a trojan payload
 type Payload struct {
-	ID   string
 	Addr net.Addr
 	Conn net.Conn
 }
