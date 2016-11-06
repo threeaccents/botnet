@@ -84,9 +84,7 @@ func (a *Attack) bruteForce(host string) {
 			}
 
 			found = true
-
 			break
-
 		}
 
 		if found {
