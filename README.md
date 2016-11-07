@@ -4,6 +4,8 @@ Simple botnet written in GO. It features a command and control over cli and a bo
 
 # Usage:
 
+Compile from the `botnet/cmd/botnet` directory.
+
  - Run the C&C:
 
 ```bash
