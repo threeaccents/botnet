@@ -38,7 +38,7 @@ func scpDir(filepath, destpath string, cred *credential) error {
 }
 
 func scpFile(filepath, destpath string, cred *credential) error {
-	cmd := exec.Command("scp", filepath, cred.username+"@"+cred.host+":"+destpath)
+	cmd := exec.Command("sshpass -p "+cred.password+" scp", filepath, cred.username+"@"+cred.host+":"+destpath)
 	if err := cmd.Run(); err != nil {
 		return err
 	}
