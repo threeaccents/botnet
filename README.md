@@ -4,7 +4,7 @@ Simple botnet written in GO. It features a command and control over cli and a bo
 
 # Usage:
 
-Compile from the `botnet/cmd/botnet` directory. 
+Compile from the `botnet/cmd/botnet` directory.
 
  - Run the C&C:
 
@@ -14,7 +14,7 @@ botnet listen
 
 This starts up a C&C that listens on default port `9999`.
 
-- Attack a machine to get the botnet on the machine. The only supported attack right now is brute forcing SSH
+- Attack a machine to get the botnet on the machine. The only supported attack right now is brute forcing SSH 
 
 ```bash
 botnet -ufile /paht/to/usernames/file -pfile /path/to/passwords/file attack ssh
