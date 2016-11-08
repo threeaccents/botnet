@@ -2,44 +2,37 @@ package ssh
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
+	"path"
+
+	"golang.org/x/crypto/ssh"
 )
 
-func scp(filepath, destpath string, cred *credential) error {
-	fmt.Println("[*] sending file to", cred.host)
-	// Open up the file to be sent over
-	f, err := os.Open(filepath)
+func scp(filePath, destinationPath string, session *ssh.Session) error {
+	f, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-
-	// Get the file stats
 	s, err := f.Stat()
 	if err != nil {
 		return err
 	}
-
-	// Check if its a file or directory
-	if s.IsDir() {
-		return scpDir(filepath, destpath, cred)
-	}
-
-	return scpFile(filepath, destpath, cred)
+	return copy(s.Size(), s.Mode().Perm(), path.Base(filePath), f, destinationPath, session)
 }
 
-func scpDir(filepath, destpath string, cred *credential) error {
-	cmd := exec.Command("scp", "-r", filepath, cred.username+"@"+cred.host+":"+destpath)
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func scpFile(filepath, destpath string, cred *credential) error {
-	cmd := exec.Command("sshpass -p "+cred.password+" scp", filepath, cred.username+"@"+cred.host+":"+destpath)
-	if err := cmd.Run(); err != nil {
+func copy(size int64, mode os.FileMode, fileName string, contents io.Reader, destination string, session *ssh.Session) error {
+	defer session.Close()
+	go func() {
+		w, _ := session.StdinPipe()
+		defer w.Close()
+		fmt.Fprintf(w, "C%#o %d %s\n", mode, size, fileName)
+		io.Copy(w, contents)
+		fmt.Fprint(w, "\x00")
+	}()
+	cmd := fmt.Sprintf("scp -t %s", destination)
+	if err := session.Run(cmd); err != nil {
 		return err
 	}
 	return nil

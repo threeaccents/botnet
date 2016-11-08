@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 
-	if args[0] != "attack" && args[0] != "listen" && args[0] != "connect" {
+	if args[0] != "attack" && args[0] != "listen" && args[0] != "connect" && args[0] != "build" {
 		fmt.Println("[ERROR] command must be either attack, listen, or connect")
 		return
 	}
@@ -56,5 +56,7 @@ func main() {
 			ReconnTime: time.Duration(*reconPtr),
 		}
 		c.Run()
+	case "build":
+		fmt.Println("I still need to implement this functionality =]")
 	}
 }

