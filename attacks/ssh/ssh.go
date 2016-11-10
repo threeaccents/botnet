@@ -51,8 +51,8 @@ func (a *Attack) Run() {
 	// check if ip address has port 22 for ssh
 	for host := range hosts {
 		port := strings.Split(host, ":")[1]
-		// addr := strings.Split(host, ":")[0]
-		if port == "22" {
+		addr := strings.Split(host, ":")[0]
+		if port == "22" && addr != localIP {
 			fmt.Println("[*] starting brute force for", host)
 			a.wg.Add(1)
 			go a.bruteForce(host)
