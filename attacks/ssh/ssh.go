@@ -85,7 +85,7 @@ func (a *Attack) install(c *credential) {
 
 	nodeOS := "linux"
 	if strings.Contains(string(out), "Users") {
-		nodeOS = "osx"
+		nodeOS = "darwin"
 	}
 
 	arch := "intel"
