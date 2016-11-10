@@ -147,7 +147,7 @@ func (a *Attack) install(c *credential) {
 		nodeOS = "darwin"
 	}
 
-	arch := "intel"
+	arch := "amd64"
 	if nodeOS == "linux" {
 		fmt.Println("[*] getting architecture")
 		sess, err := getSSHSession(c.host, c.username, c.password)
