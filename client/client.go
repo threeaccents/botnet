@@ -107,7 +107,7 @@ func (c *Client) chDir(cmd []byte) {
 		return
 	}
 
-	c.Conn.Write([]byte("changed into " + dir + "\r"))
+	c.Conn.Write([]byte(" \r"))
 }
 
 func (c *Client) receiveFile() {
