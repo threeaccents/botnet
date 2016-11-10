@@ -36,7 +36,7 @@ func (c *Client) Run() {
 
 	c.Conn = conn
 
-	go c.checkHealth()
+	// go c.checkHealth()
 
 	for {
 		// commandByteBuffer is the firt 2 bytes being sent by the server
