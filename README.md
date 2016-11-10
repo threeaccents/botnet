@@ -79,7 +79,7 @@ You should see a message saying `payload exiting` and the prompt should be back 
 
 #Terms of Use
 
-* Do NOT use this on any computer you do not own, or are allowed to run this on;
-* You may NEVER attempt to sell this, its free and open source;
-* The authors and publishers assume no responsibility;
+* Do NOT use this on any computer you do not own, or are not allowed to run this on.
+* You may NEVER attempt to sell this, its free and open source.
+* The authors and publishers assume no responsibility.
 * For educational purposes only.
