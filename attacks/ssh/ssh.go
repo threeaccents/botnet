@@ -219,6 +219,12 @@ func (a *Attack) executeWithOutput(cmd string, c *credential) ([]byte, error) {
 	}
 	defer sess.Close()
 
+	stderr, err := sess.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+	go io.Copy(os.Stderr, stderr)
+
 	return sess.Output(cmd)
 }
 
