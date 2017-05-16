@@ -10,7 +10,7 @@ import (
 
 	"sync"
 
-	"gitlab.com/rodzzlessa24/botnet/scanner"
+	"github.com/rodzzlessa24/botnet/scanner"
 	"golang.org/x/crypto/ssh"
 )
 

