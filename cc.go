@@ -27,7 +27,7 @@ func NewCC(host, port string, s Storage) *CC {
 		Storage: s,
 	}
 
-	if err := s.CreateBuckets(); err != nil {
+	if err := s.CreateTables(); err != nil {
 		log.Panic(err)
 	}
 	return cc
@@ -36,10 +36,11 @@ func NewCC(host, port string, s Storage) *CC {
 //ListenAPI is
 func (c *CC) ListenAPI() {
 	addr := fmt.Sprintf("%s:%s", c.Host, c.APIPort)
-
-	http.HandleFunc("/hey", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("sup"))
 	})
+	fs := http.FileServer(http.Dir("../web"))
+	http.Handle("/", fs)
 	Msg("http listening on", addr)
 	http.ListenAndServe(addr, nil)
 }
