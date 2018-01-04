@@ -5,3 +5,5 @@ private_pass.txt
 server.key
 server.crt
 server.csr
+data/
+data.zip

@@ -2,7 +2,6 @@ package botnet
 
 import (
 	"fmt"
-	"os"
 )
 
 const commandLength = 12
@@ -31,16 +30,12 @@ func bytesToCommand(bytes []byte) string {
 
 // Msg is
 func Msg(msg ...interface{}) {
-	if os.Getenv("DEBUG") == "true" {
-		m := append([]interface{}{"[*]"}, msg...)
-		fmt.Println(m...)
-	}
+	m := append([]interface{}{"[*]"}, msg...)
+	fmt.Println(m...)
 }
 
 // Err is
 func Err(msg ...interface{}) {
-	if os.Getenv("DEBUG") == "true" {
-		m := append([]interface{}{"[ERROR]"}, msg...)
-		fmt.Println(m...)
-	}
+	m := append([]interface{}{"[ERROR]"}, msg...)
+	fmt.Println(m...)
 }
