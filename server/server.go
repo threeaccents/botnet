@@ -16,13 +16,6 @@ import (
 // when uploading a file
 const BufferSize = 1024
 
-// Server is
-type Server struct {
-	Port     int
-	Target   string
-	Payloads []*Payload
-}
-
 // Run runs the trojan server
 func (c *Server) Run() {
 	cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
