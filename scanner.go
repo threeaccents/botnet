@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -48,7 +49,6 @@ func NewScanner(hosts, ports []string, maxQueue, maxWorkers int) *Scanner {
 	}
 
 	for i := 0; i < maxWorkers; i++ {
-		fmt.Println("starting worker", i+1)
 		worker := newWorker(s.workerQueue)
 		s.workers = append(s.workers, worker)
 		worker.Start()
@@ -116,6 +116,9 @@ func (s *Scanner) scanPort(addr string) error {
 		if e, ok := err.(net.Error); ok && e.Timeout() {
 			return ErrTimeout
 		}
+		if strings.Contains(err.Error(), "getsockopt: connection refused") {
+			return ErrConnRefused
+		}
 		return err
 	}
 	conn.Close()
@@ -153,7 +156,7 @@ func (w worker) Start() {
 			case job := <-w.Work:
 				time.Sleep(1 * time.Second)
 				if err := job.scanner.scanPort(job.addr); err != nil {
-					if err != ErrTimeout {
+					if err != ErrTimeout && err != ErrConnRefused {
 						job.scanner.errCh <- err
 					}
 					break
@@ -163,7 +166,6 @@ func (w worker) Start() {
 			case <-w.QuitChan:
 				// We have been asked to stop.
 				close(w.Work)
-				fmt.Printf("worker stopping\n")
 				return
 			}
 		}

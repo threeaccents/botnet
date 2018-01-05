@@ -7,6 +7,7 @@ const (
 	ErrNotFound     = Error("resource not found")
 	ErrBadRequest   = Error("bad request")
 	ErrTimeout      = Error("request timed out")
+	ErrConnRefused  = Error("connection refused")
 )
 
 // Error represents a Vano error.

