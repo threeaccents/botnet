@@ -57,15 +57,6 @@ func (c *Client) AddBot(b *botnet.Bot) (*botnet.Bot, error) {
 	return b, nil
 }
 
-func (c *Client) exec(q string, args ...interface{}) (sql.Result, error) {
-	stmt, err := c.DB.Prepare(q)
-	if err != nil {
-		return nil, err
-	}
-
-	return stmt.Exec(args...)
-}
-
 //AddRansomKey is
 func (c *Client) AddRansomKey(botID, key []byte) error {
 	return nil
@@ -87,16 +78,12 @@ func (c *Client) ListBots() ([]*botnet.Bot, error) {
 
 	bots := []*botnet.Bot{}
 	for rows.Next() {
+		b := new(botnet.Bot)
 		var id string
-		var host string
-		var port string
-		if err := rows.Scan(&id, &host, &port); err != nil {
+		if err := rows.Scan(&id, &b.Host, &b.Port); err != nil {
 			return nil, err
 		}
-		b := new(botnet.Bot)
 		b.ID, _ = hex.DecodeString(id)
-		b.Host = host
-		b.Port = port
 		bots = append(bots, b)
 	}
 
@@ -106,4 +93,13 @@ func (c *Client) ListBots() ([]*botnet.Bot, error) {
 //GetBot is
 func (c *Client) GetBot(id []byte) (*botnet.Bot, error) {
 	return nil, nil
+}
+
+func (c *Client) exec(q string, args ...interface{}) (sql.Result, error) {
+	stmt, err := c.DB.Prepare(q)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Exec(args...)
 }
