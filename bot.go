@@ -69,7 +69,7 @@ func (b *Bot) handleConnection(conn net.Conn) {
 func (b *Bot) handleScan(payload []byte) {
 	hosts := []string{"127.0.0.1"}
 	ports := []string{"8000", "1", "2", "22"}
-	s := NewScanner(hosts, ports, 50, 50)
+	s := NewScanner(hosts, ports, 50)
 
 	resCh := s.Scan()
 	var res []string
