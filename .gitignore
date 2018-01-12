@@ -1,5 +1,4 @@
 misc/
-main.go
 private_uname.txt
 private_pass.txt
 server.key
