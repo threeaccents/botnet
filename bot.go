@@ -8,6 +8,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 //Bot is
@@ -20,6 +23,35 @@ type Bot struct {
 //Addr is
 func (b *Bot) Addr() string {
 	return fmt.Sprintf("%s:%s", b.Host, b.Port)
+}
+
+//NewBot is
+func NewBot(ccAddr string) (*Bot, error) {
+	conn, err := net.Dial("tcp", ccAddr)
+	if err != nil {
+		return nil, fmt.Errorf("%s is not available", ccAddr)
+	}
+	defer conn.Close()
+
+	bot := &Bot{
+		ID:   uuid.NewV4().Bytes(),
+		Host: strings.Split(conn.LocalAddr().String(), ":")[0],
+		Port: strings.Split(conn.LocalAddr().String(), ":")[1],
+	}
+
+	buff, err := bot.Bytes()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	data := append(commandToBytes("genesis"), buff...)
+
+	_, err = io.Copy(conn, bytes.NewReader(data))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return bot, nil
 }
 
 //Listen is

