@@ -12,8 +12,8 @@ import (
 
 var (
 	hostPtr    = flag.String("host", "127.0.0.1", "the host for the command and control")
-	portPtr    = flag.String("port", "foo", "the port for the command and control")
-	webPortPtr = flag.String("webport", "foo", "the port for the web dashboard")
+	portPtr    = flag.String("port", "9090", "the port for the command and control")
+	webPortPtr = flag.String("webport", "8000", "the port for the web dashboard")
 )
 
 func main() {
