@@ -41,7 +41,7 @@ func (h *Handler) handleCommand() http.Handler {
 		command := r.PostFormValue("command")
 		switch command {
 		case "scan":
-			if err := h.CC.ScanCmd(addr); err != nil {
+			if err := h.CommanderService.ScanCmd(addr); err != nil {
 				w.Write([]byte(err.Error()))
 				return
 			}

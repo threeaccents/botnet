@@ -16,9 +16,20 @@ type Botter interface {
 
 //Bot is
 type Bot struct {
-	ID   []byte
-	Host string
-	Port string
+	ID     []byte
+	Host   string
+	Port   string
+	CCAddr string
+}
+
+//Bytes is
+func (b *Bot) Bytes() ([]byte, error) {
+	buff := new(bytes.Buffer)
+	if err := gob.NewEncoder(buff).Encode(b); err != nil {
+		return nil, err
+	}
+
+	return buff.Bytes(), nil
 }
 
 //Addr is

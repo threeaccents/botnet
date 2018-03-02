@@ -10,16 +10,16 @@ import (
 //Handler is
 type Handler struct {
 	*mux.Router
-	CC      botnet.Commander
-	Storage botnet.Storager
+	CommanderService botnet.Commander
+	Storage          botnet.Storager
 }
 
 //NewHandler is
 func NewHandler(cc botnet.Commander, storage botnet.Storager) *Handler {
 	h := &Handler{
-		Router:  mux.NewRouter(),
-		CC:      cc,
-		Storage: storage,
+		Router:           mux.NewRouter(),
+		CommanderService: cc,
+		Storage:          storage,
 	}
 
 	const listBotsPath = "/bots"

