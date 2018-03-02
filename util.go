@@ -1,31 +1,18 @@
 package botnet
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 )
 
-const commandLength = 12
-
-func commandToBytes(command string) []byte {
-	var bytes [commandLength]byte
-
-	for i, c := range command {
-		bytes[i] = byte(c)
+//Bytes transform what ever payload is past in to a byte array
+func Bytes(v interface{}) ([]byte, error) {
+	b := new(bytes.Buffer)
+	if err := gob.NewEncoder(b).Encode(v); err != nil {
+		return nil, err
 	}
-
-	return bytes[:]
-}
-
-func bytesToCommand(bytes []byte) string {
-	var command []byte
-
-	for _, b := range bytes {
-		if b != 0x0 {
-			command = append(command, b)
-		}
-	}
-
-	return fmt.Sprintf("%s", command)
+	return b.Bytes(), nil
 }
 
 // Msg is
@@ -37,5 +24,11 @@ func Msg(msg ...interface{}) {
 // Err is
 func Err(msg ...interface{}) {
 	m := append([]interface{}{"[ERROR]"}, msg...)
+	fmt.Println(m...)
+}
+
+// Debug is
+func Debug(msg ...interface{}) {
+	m := append([]interface{}{"[DEBUG]"}, msg...)
 	fmt.Println(m...)
 }
