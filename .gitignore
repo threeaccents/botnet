@@ -6,3 +6,4 @@ server.crt
 server.csr
 data/
 data.zip
+.DS_Store
