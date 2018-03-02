@@ -20,6 +20,6 @@ type Commander interface {
 	RansomCmd(addr string) error
 	ScanCmd(addr string) error
 
-	HandleGenesis()
-	HandleRansomComplete()
+	HandleGenesis(payload []byte)
+	HandleRansomComplete(payload []byte)
 }
