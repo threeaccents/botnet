@@ -4,21 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Botnet</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
-<body>
-    <h1>Bots</h1>
-    <ul>
-        {{range .Bots}}
-            <li>
-                <p>{{.Host}}:{{.Port}}</p>
-                <form method="post" action="/commands">
-                    <input type="hidden" name="addr" value="{{.Host}}:{{.Port}}">
-                    <input type="hidden" name="command" value="scan">
-                    <button type="submit">Scan</button>
-                </form>
-            </li>
-        {{end}}
-    </ul>
+<body style="padding: 1.25rem">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xs-12">
+            <h1>Hoji</h1>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bot ID</th>
+                            <th>Host</th>
+                            <th>Port</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Bots}}
+                            <tr>
+                                <td>{{.ID}}</td>
+                                <td>{{.Host}}</td>
+                                <td>{{.Port}}</td>
+                                <td>
+                                    <form method="post" action="/commands">   
+                                        <input type="hidden" name="addr" value="{{.Host}}:{{.Port}}">      
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <input type="text" class="form-control" name="command">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button class="btn btn-dark" type="submit">Send</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

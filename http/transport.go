@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -31,6 +32,17 @@ func (h *Handler) handleListBots() http.Handler {
 		}
 
 		tmpl.Execute(w, data)
+	})
+}
+
+func (h *Handler) handleCheckBotsHealth() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bots, err := h.Storage.ListBots()
+		if err != nil {
+			w.Write([]byte("we have an error"))
+			return
+		}
+		fmt.Println(bots)
 	})
 }
 

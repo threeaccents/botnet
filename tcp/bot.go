@@ -27,10 +27,11 @@ func NewBot(ccAddr string) (*BotService, error) {
 		return nil, fmt.Errorf("%s is not available", ccAddr)
 	}
 	bot := &botnet.Bot{
-		ID:     uuid.NewV4().Bytes(),
-		Host:   strings.Split(conn.LocalAddr().String(), ":")[0],
-		Port:   strings.Split(conn.LocalAddr().String(), ":")[1],
-		CCAddr: ccAddr,
+		ID:      uuid.NewV4().Bytes(),
+		Host:    strings.Split(conn.LocalAddr().String(), ":")[0],
+		Port:    strings.Split(conn.LocalAddr().String(), ":")[1],
+		CCAddr:  ccAddr,
+		IsAlive: true,
 	}
 	conn.Close()
 

