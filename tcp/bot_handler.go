@@ -9,7 +9,7 @@ import (
 
 //HandleScan is
 func (b *BotService) HandleScan(payload []byte) {
-	resCh := b.PortScanner.SimpleScan()
+	resCh := b.PortScanner.SimpleScan([]string{"127.0.0.1"})
 	var res []string
 	for addr := range resCh {
 		fmt.Println("addr found", addr)
