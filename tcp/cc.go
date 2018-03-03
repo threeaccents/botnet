@@ -32,7 +32,7 @@ func (c *CommanderService) Listen() {
 		botnet.Err(err, "listening on addr", c.CC.Addr())
 		return
 	}
-	botnet.Msg("listening on", c.CC.Addr())
+	botnet.Msg("botnet listening on", c.CC.Addr())
 
 	c.acceptConnections(listener)
 }

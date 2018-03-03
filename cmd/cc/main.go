@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 
+	"github.com/rodzzlessa24/botnet"
+
 	"github.com/rodzzlessa24/botnet/tcp"
 
 	"github.com/rodzzlessa24/botnet/http"
@@ -37,5 +39,6 @@ func main() {
 
 	h := http.NewHandler(commander, storage)
 
+	botnet.Msg("web server available on port", *webPortPtr)
 	log.Fatal(http.ListenAndServe(httpAddress, h))
 }
