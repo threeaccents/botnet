@@ -6,5 +6,6 @@ type Storager interface {
 	RemoveBot(id []byte) error
 	ListBots() ([]*Bot, error)
 	GetBot(id []byte) (*Bot, error)
+	UpdateBot(b *Bot) (*Bot, error)
 	AddRansomKey(botID, key []byte) error
 }

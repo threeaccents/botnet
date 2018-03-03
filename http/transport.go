@@ -1,8 +1,9 @@
 package http
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/sessions"
 	"github.com/rodzzlessa24/botnet"
@@ -42,7 +43,14 @@ func (h *Handler) handleCheckBotsHealth() http.Handler {
 			w.Write([]byte("we have an error"))
 			return
 		}
-		fmt.Println(bots)
+		wg := new(sync.WaitGroup)
+		wg.Add(len(bots))
+		for _, bot := range bots {
+			go h.checkBotHealth(bot, wg)
+		}
+		wg.Wait()
+		botnet.Msg("finished checking bots health")
+		http.Redirect(w, r, "http://localhost:8000/bots", 301)
 	})
 }
 
@@ -60,4 +68,21 @@ func (h *Handler) handleCommand() http.Handler {
 		}
 		http.Redirect(w, r, "http://localhost:8000/bots", 301)
 	})
+}
+
+// Iffy function come back to it later
+func (h *Handler) checkBotHealth(bot *botnet.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	if err := h.CommanderService.CheckBotHealth(bot); err != nil {
+		bot.IsAlive = false
+		if _, err := h.Storage.UpdateBot(bot); err != nil {
+			log.Panic(err)
+		}
+		return
+	}
+	bot.IsAlive = true
+	if _, err := h.Storage.UpdateBot(bot); err != nil {
+		log.Panic(err)
+	}
 }

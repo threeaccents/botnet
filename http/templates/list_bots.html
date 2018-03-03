@@ -12,13 +12,18 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-xs-12">
-            <h1>Hoji</h1>
+                <div class="row">
+                    <form method="post" action="/bots/health">
+                        <button class="btn btn-primary">Check Health</button>
+                    </form>
+                </div>
                 <table class="table">
                     <thead>
                         <tr>
                             <th>Bot ID</th>
                             <th>Host</th>
                             <th>Port</th>
+                            <th>Alive</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -28,6 +33,7 @@
                                 <td>{{.ID}}</td>
                                 <td>{{.Host}}</td>
                                 <td>{{.Port}}</td>
+                                <td>{{.IsAlive}}</td>
                                 <td>
                                     <form method="post" action="/commands">   
                                         <input type="hidden" name="addr" value="{{.Host}}:{{.Port}}">      

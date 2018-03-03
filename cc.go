@@ -1,6 +1,8 @@
 package botnet
 
-import "fmt"
+import (
+	"fmt"
+)
 
 //CommandControl is
 type CommandControl struct {
@@ -22,4 +24,6 @@ type Commander interface {
 
 	HandleGenesis(payload []byte)
 	HandleRansomComplete(payload []byte)
+
+	CheckBotHealth(bot *Bot) error
 }
