@@ -61,6 +61,8 @@ func (c *CommanderService) handleConnection(conn net.Conn) {
 		c.HandleGenesis(req.Bytes()[commandLength:])
 	case "rancom":
 		c.HandleRansomComplete(req.Bytes()[commandLength:])
+	case "scanresp":
+		c.HandleScanResponse(req.Bytes()[commandLength:])
 	}
 	conn.Close()
 }

@@ -10,3 +10,7 @@ type scanRequest struct {
 	Hosts []string
 	Ports []string
 }
+
+type scanResponse struct {
+	Addrs []string
+}

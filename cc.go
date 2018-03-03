@@ -24,6 +24,7 @@ type Commander interface {
 
 	HandleGenesis(payload []byte)
 	HandleRansomComplete(payload []byte)
+	HandleScanResponse(payload []byte)
 
 	CheckBotHealth(bot *Bot) error
 }

