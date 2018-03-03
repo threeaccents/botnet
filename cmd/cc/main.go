@@ -27,17 +27,20 @@ func main() {
 		httpAddress = ":" + *webPortPtr
 	}
 
+	// Open boltdb database
 	db, err := bolt.Open("./cc.db")
 	if err != nil {
 		log.Panic(err)
 	}
 	defer db.Close()
-	c, err := bolt.NewClient(db)
+
+	// create a new storage service client
+	storage, err := bolt.NewClient(db)
 	if err != nil {
 		log.Panic(err)
 	}
-	storage := c
 
+	// create a tcp command control
 	commander := tcp.NewCC(*hostPtr, *portPtr, storage)
 	go commander.Listen()
 
