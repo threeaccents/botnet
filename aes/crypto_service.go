@@ -13,7 +13,6 @@ import (
 
 type CryptoService struct {
 	Key string
-
 	Log zerolog.Logger
 }
 
