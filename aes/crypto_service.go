@@ -7,21 +7,14 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-
-	"github.com/rs/zerolog"
 )
 
 type CryptoService struct {
-	Key string
-	Log zerolog.Logger
-}
-
-func (s CryptoService) key() []byte {
-	return []byte(s.Key)
+	Key []byte
 }
 
 func (s *CryptoService) Encrypt(plaintext []byte) ([]byte, error) {
-	c, err := aes.NewCipher(s.key())
+	c, err := aes.NewCipher(s.Key)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new cipher %v", err)
 	}
@@ -51,7 +44,7 @@ func (s *CryptoService) EncryptToString(plaintext []byte) (string, error) {
 }
 
 func (s *CryptoService) Decrypt(ciphertext []byte) ([]byte, error) {
-	c, err := aes.NewCipher(s.key())
+	c, err := aes.NewCipher(s.Key)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new cipher %v", err)
 	}
