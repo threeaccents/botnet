@@ -6,18 +6,6 @@ import (
 	"fmt"
 )
 
-//Botter is
-type Botter interface {
-	RansomCompleteCmd()
-	ScanResponseCmd(addrs []string) error
-
-	HandleScan()
-	HandleRansomware()
-
-	CheckBotsHealth() error
-	// CheckBotHealth(botID []byte) error
-}
-
 //Bot is
 type Bot struct {
 	ID      []byte
