@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"github.com/threeaccents/botnet"
+	"github.com/threeaccents/botnet/libs/bytesutil"
 )
 
 //RansomCompleteCmd is
@@ -25,7 +26,7 @@ func (b *BotService) GenesisCmd(bot *botnet.Bot) error {
 func (b *BotService) ScanResponseCmd(addrs []string) error {
 	req := scanResponse{addrs}
 
-	buff, err := botnet.Bytes(req)
+	buff, err := bytesutil.Marshal(req)
 	if err != nil {
 		return err
 	}

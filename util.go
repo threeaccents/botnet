@@ -1,19 +1,9 @@
 package botnet
 
 import (
-	"bytes"
-	"encoding/gob"
+	"crypto/rand"
 	"fmt"
 )
-
-//Bytes transform what ever payload is past in to a byte array
-func Bytes(v interface{}) ([]byte, error) {
-	b := new(bytes.Buffer)
-	if err := gob.NewEncoder(b).Encode(v); err != nil {
-		return nil, err
-	}
-	return b.Bytes(), nil
-}
 
 // Msg is
 func Msg(msg ...interface{}) {
@@ -31,4 +21,16 @@ func Err(msg ...interface{}) {
 func Debug(msg ...interface{}) {
 	m := append([]interface{}{"[DEBUG]"}, msg...)
 	fmt.Println(m...)
+}
+
+// GenerateKey generates a 32 byte key
+func GenerateKey() ([]byte, error) {
+	key := make([]byte, 64)
+
+	_, err := rand.Read(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return key, nil
 }

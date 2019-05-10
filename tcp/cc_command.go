@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"github.com/threeaccents/botnet"
+	"github.com/threeaccents/botnet/libs/bytesutil"
 )
 
 //ScanCmd is
@@ -11,7 +12,7 @@ func (c *CommanderService) ScanCmd(addr string) error {
 		Type:  "simple",
 		Hosts: []string{"127.0.0.1"},
 	}
-	b, err := botnet.Bytes(req)
+	b, err := bytesutil.Marshal(req)
 	if err != nil {
 		return err
 	}

