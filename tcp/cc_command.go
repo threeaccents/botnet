@@ -1,7 +1,7 @@
 package tcp
 
 import (
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 //ScanCmd is

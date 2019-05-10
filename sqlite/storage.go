@@ -6,7 +6,7 @@ import (
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 //Client i

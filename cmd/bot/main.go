@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/rodzzlessa24/botnet/tcp"
+	"github.com/threeaccents/botnet/tcp"
 )
 
 var (

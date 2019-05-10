@@ -4,12 +4,12 @@ import (
 	"flag"
 	"log"
 
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 
-	"github.com/rodzzlessa24/botnet/tcp"
+	"github.com/threeaccents/botnet/tcp"
 
-	"github.com/rodzzlessa24/botnet/bolt"
-	"github.com/rodzzlessa24/botnet/http"
+	"github.com/threeaccents/botnet/bolt"
+	"github.com/threeaccents/botnet/http"
 )
 
 var (

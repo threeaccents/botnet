@@ -1,6 +1,6 @@
 package tcp
 
-import "github.com/rodzzlessa24/botnet/lib/portscan"
+import "github.com/threeaccents/botnet/lib/portscan"
 
 //PortScanService is
 type PortScanService struct {

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 //CommanderService is

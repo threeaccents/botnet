@@ -2,7 +2,7 @@ package bolt
 
 import (
 	bolt "github.com/coreos/bbolt"
-	"github.com/rodzzlessa24/botnet"
+	"github.com/threeaccents/botnet"
 )
 
 const (
