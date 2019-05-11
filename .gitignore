@@ -5,6 +5,7 @@ server.key
 server.crt
 server.csr
 data/
+gitlab.com.zip
 data.zip
 .DS_Store
 **/.DS_Store

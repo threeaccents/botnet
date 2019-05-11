@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/mux v1.7.1
 	github.com/gorilla/sessions v1.1.3
 	github.com/mattn/go-sqlite3 v1.10.0
+	github.com/pkg/errors v0.8.1
 	github.com/rs/zerolog v1.14.3
 	github.com/satori/go.uuid v1.2.0
 )
